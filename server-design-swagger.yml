@@ -3,9 +3,10 @@ info:
   title: SecureDoc Project Server API
   version: "1.0.0"
   description: >
-    This API is used for the server component of SecureDoc project.
+    This API is used for the server component of a SecureDoc project.
     It supports JWT-based authentication, file uploads (with a corresponding database record),
-    REST endpoints for file and user management, and permission handling on files.
+    standard REST endpoints for file and user management, file permission control,
+    and hardware configuration for Arduino devices.
 servers:
   - url: http://localhost:3000
     description: Local development server
@@ -59,6 +60,10 @@ components:
             - user
             - admin
           description: "Default is 'user' for registration"
+        password:
+          type: string
+          writeOnly: true
+          description: "Write-only field used for creating/updating a user"
         created_at:
           type: string
           format: date-time
@@ -79,13 +84,17 @@ components:
           type: string
         localUrl:
           type: string
-          description: "Local path/URL where file is stored"
+          description: "Local path/URL where the file is stored"
         size:
           type: integer
           description: "File size in bytes"
         owner:
           type: string
           description: "ID of the user who owns the file"
+        hardwarePinHash:
+          type: string
+          writeOnly: true
+          description: "Optional hashed hardware PIN from the Arduino console (write-only)"
         created_by:
           type: string
           description: "ID of the user who created the record"
@@ -122,6 +131,28 @@ components:
         - fileId
         - userId
         - permission
+        - created_at
+    ArduinoConfig:
+      type: object
+      properties:
+        id:
+          type: string
+        consoleHash:
+          type: string
+          description: "Hardcoded hash secret for the Arduino console"
+        enabled:
+          type: boolean
+          description: "Switch indicating if the Arduino is enabled or disabled"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - consoleHash
+        - enabled
         - created_at
 
 paths:
@@ -221,7 +252,7 @@ paths:
         '404':
           description: File not found
     put:
-      summary: Update a file record
+      summary: Update a file record (can include hardware PIN update)
       security:
         - authToken: []
       requestBody:
@@ -259,6 +290,14 @@ paths:
           required: true
           schema:
             type: string
+        - name: hardware-pin
+          in: header
+          required: false
+          schema:
+            type: string
+          description: >
+            Optional hardware PIN. If the file has a hardwarePinHash set,
+            the provided PIN (after hashing) must match to authorize the download.
       responses:
         '200':
           description: Temporary download link provided
@@ -271,7 +310,7 @@ paths:
                     type: string
                     description: "Temporary URL to download/stream the file"
         '403':
-          description: Forbidden – insufficient permissions to download file
+          description: Forbidden – insufficient permissions or incorrect hardware PIN
         '404':
           description: File not found
   /file/{id}/user:
@@ -363,7 +402,6 @@ paths:
       security:
         - authToken: []
       requestBody:
-        required: true
         content:
           application/json:
             schema:
@@ -384,3 +422,91 @@ paths:
           description: User deleted successfully
         '404':
           description: User not found
+  /arduino:
+    get:
+      summary: Retrieve a list of Arduino configurations (Admins only)
+      security:
+        - authToken: []
+      description: "Access limited to admin users."
+      responses:
+        '200':
+          description: A list of Arduino configurations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ArduinoConfig'
+    post:
+      summary: Create a new Arduino configuration (Admins only)
+      security:
+        - authToken: []
+      description: "Access limited to admin users."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArduinoConfig'
+      responses:
+        '201':
+          description: Arduino configuration created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArduinoConfig'
+        '400':
+          description: Bad Request – invalid input data
+  /arduino/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Retrieve an Arduino configuration by ID (Admins only)
+      security:
+        - authToken: []
+      description: "Access limited to admin users."
+      responses:
+        '200':
+          description: Arduino configuration retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArduinoConfig'
+        '404':
+          description: Arduino configuration not found
+    put:
+      summary: Update an Arduino configuration by ID (Admins only)
+      security:
+        - authToken: []
+      description: "Access limited to admin users."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArduinoConfig'
+      responses:
+        '200':
+          description: Arduino configuration updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArduinoConfig'
+        '400':
+          description: Bad Request – invalid input data
+        '404':
+          description: Arduino configuration not found
+    delete:
+      summary: Delete an Arduino configuration by ID (Admins only)
+      security:
+        - authToken: []
+      description: "Access limited to admin users."
+      responses:
+        '204':
+          description: Arduino configuration deleted successfully
+        '404':
+          description: Arduino configuration not found
