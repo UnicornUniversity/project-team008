@@ -1,9 +1,9 @@
 openapi: "3.0.3"
 info:
-  title: School Project Server API
+  title: SecureDoc Project Server API
   version: "1.0.0"
   description: >
-    This API is used for the server component of a school project.
+    This API is used for the server component of SecureDoc project.
     It supports JWT-based authentication, file uploads (with a corresponding database record),
     REST endpoints for file and user management, and permission handling on files.
 servers:
