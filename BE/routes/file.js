@@ -1,0 +1,16 @@
+const express = require("express");
+const router = express.Router();
+const authenticateToken = require("../middleware/auth.js");
+const upload = require("../middleware/upload");
+const fileController = require("../controllers/fileController");
+
+router.post(
+  "/",
+  authenticateToken,
+  upload.single("file"),
+  fileController.uploadFile
+);
+
+router.get("/", authenticateToken, fileController.getFiles);
+
+module.exports = router;
