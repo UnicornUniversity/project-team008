@@ -15,4 +15,6 @@ router.get("/", authenticateToken, fileController.getFiles);
 
 router.get("/:id", authenticateToken, fileController.getFileById);
 
+router.put("/:id", authenticateToken, fileController.updateFile);
+
 module.exports = router;

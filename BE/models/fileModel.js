@@ -45,4 +45,40 @@ async function hasAccess(fileId, userId) {
   return rows.length > 0;
 }
 
-module.exports = { createFile, getById, hasAccess, findByIdAndOwner };
+const updateById = async (id, updates) => {
+  const conn = await pool.getConnection();
+  try {
+    const fields = [];
+    const values = [];
+
+    if (updates.fileName) {
+      fields.push("fileName = ?");
+      values.push(updates.fileName);
+    }
+    if (updates.hardwarePinHash) {
+      fields.push("hardwarePinHash = ?");
+      values.push(updates.hardwarePinHash);
+    }
+
+    if (fields.length === 0) return null;
+
+    values.push(id);
+    const sql = `UPDATE files SET ${fields.join(", ")} WHERE id = ?`;
+    await conn.query(sql, values);
+
+    const [updatedRows] = await conn.query("SELECT * FROM files WHERE id = ?", [
+      id,
+    ]);
+    return updatedRows[0];
+  } finally {
+    conn.release();
+  }
+};
+
+module.exports = {
+  createFile,
+  getById,
+  hasAccess,
+  findByIdAndOwner,
+  updateById,
+};

@@ -34,8 +34,35 @@ const getFileById = async (req, res) => {
 
     res.status(200).json(file);
   } catch (err) {
-    console.error("❌ Chyba v getFileById:", err); // <- přidej tohle
+    console.error("❌ Chyba v getFileById:", err);
     res.status(500).json({ message: "Chyba serveru" });
+  }
+};
+
+const updateFile = async (req, res) => {
+  const fileId = req.params.id;
+  const userId = req.user.id;
+  const { fileName, hardwarePinHash } = req.body;
+
+  console.log("🛠️ updateFile zavolán:", fileId, "uživatel:", userId);
+
+  try {
+    const file = await fileModel.findByIdAndOwner(fileId, userId);
+    if (!file) {
+      return res
+        .status(403)
+        .json({ message: "Nemáte oprávnění upravovat tento soubor" });
+    }
+
+    const updated = await fileModel.updateById(fileId, {
+      fileName,
+      hardwarePinHash,
+    });
+
+    res.status(200).json(updated);
+  } catch (err) {
+    console.error("❌ Chyba při aktualizaci souboru:", err);
+    res.status(500).json({ message: "Chyba serveru při aktualizaci" });
   }
 };
 
@@ -68,4 +95,5 @@ module.exports = {
   uploadFile,
   getFiles,
   getFileById,
+  updateFile,
 };
