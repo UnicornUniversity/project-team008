@@ -1,5 +1,6 @@
 const pool = require("../config/db");
 const { v4: uuidv4 } = require("uuid");
+const db = require("../config/db");
 
 async function createFile({ fileName, localUrl, size, owner, created_by }) {
   const id = uuidv4();
@@ -75,10 +76,16 @@ const updateById = async (id, updates) => {
   }
 };
 
+const deleteById = async (id) => {
+  const [rows] = await db.query("DELETE FROM files WHERE id = ?", [id]);
+  return rows;
+};
+
 module.exports = {
   createFile,
   getById,
   hasAccess,
   findByIdAndOwner,
   updateById,
+  deleteById,
 };

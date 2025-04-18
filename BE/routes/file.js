@@ -17,4 +17,6 @@ router.get("/:id", authenticateToken, fileController.getFileById);
 
 router.put("/:id", authenticateToken, fileController.updateFile);
 
+router.delete("/:id", authenticateToken, fileController.deleteFile);
+
 module.exports = router;

@@ -1,6 +1,7 @@
 const path = require("path");
 const fileModel = require("../models/fileModel");
 const db = require("../config/db");
+const fs = require("fs");
 
 const getFiles = async (req, res) => {
   try {
@@ -66,6 +67,39 @@ const updateFile = async (req, res) => {
   }
 };
 
+const deleteFile = async (req, res) => {
+  const fileId = req.params.id;
+  const userId = req.user.id;
+
+  console.log("🗑️ deleteFile zavolán", fileId, "uživatel:", userId);
+
+  try {
+    const file = await fileModel.findByIdAndOwner(fileId, userId);
+    if (!file) {
+      return res
+        .status(404)
+        .json({ message: "Soubor nenalezen nebo přístup odepřen" });
+    }
+
+    await fileModel.deleteById(fileId);
+
+    const filePath = path.join(__dirname, "..", file.localUrl);
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.warn(
+          "⚠️ Soubor v souborovém systému nebyl nalezen nebo již byl smazán:",
+          err.message
+        );
+      }
+    });
+
+    res.status(204).send();
+  } catch (err) {
+    console.error("❌ Chyba v deleteFile:", err);
+    res.status(500).json({ message: "Chyba serveru" });
+  }
+};
+
 const uploadFile = async (req, res) => {
   try {
     if (!req.file) {
@@ -96,4 +130,5 @@ module.exports = {
   getFiles,
   getFileById,
   updateFile,
+  deleteFile,
 };
