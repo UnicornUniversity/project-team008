@@ -23,8 +23,7 @@ uploads/
 .DS_Store
 Thumbs.db
 
-# MySQL dumps
-*.sql
+
 
 # VSCode settings (volitelně)
 .vscode/
