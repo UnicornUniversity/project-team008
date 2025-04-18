@@ -13,4 +13,6 @@ router.post(
 
 router.get("/", authenticateToken, fileController.getFiles);
 
+router.get("/:id", authenticateToken, fileController.getFileById);
+
 module.exports = router;

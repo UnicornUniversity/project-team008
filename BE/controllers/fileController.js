@@ -21,6 +21,24 @@ const getFiles = async (req, res) => {
   }
 };
 
+const getFileById = async (req, res) => {
+  const id = req.params.id;
+  const userId = req.user.id;
+  console.log("🔍 getFileById zavolán pro ID:", id);
+
+  try {
+    const file = await fileModel.findByIdAndOwner(id, userId);
+    if (!file) {
+      return res.status(404).json({ message: "Soubor nebyl nalezen" });
+    }
+
+    res.status(200).json(file);
+  } catch (err) {
+    console.error("❌ Chyba v getFileById:", err); // <- přidej tohle
+    res.status(500).json({ message: "Chyba serveru" });
+  }
+};
+
 const uploadFile = async (req, res) => {
   try {
     if (!req.file) {
@@ -49,4 +67,5 @@ const uploadFile = async (req, res) => {
 module.exports = {
   uploadFile,
   getFiles,
+  getFileById,
 };
