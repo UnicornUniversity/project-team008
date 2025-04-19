@@ -1,8 +1,13 @@
-//authService.jsx
-// This is a mock authentication service that simulates a login process.
-
+// Mock uživatelé s hashovanými hesly a rolemi
 const USERS = {
-  admin: '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'
+  admin: {
+    hash: '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', // '1234'
+    role: 'admin'
+  },
+  user: {
+    hash: '05d49692b755f99c4504b510418efeeeebfd466892540f27acf9a31a326d6504', // 'userpass'
+    role: 'user'
+  }
 }
 
 export const hashPassword = async (password) => {
@@ -18,15 +23,16 @@ export const fakeLogin = async (username, password) => {
 
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (USERS[username] && USERS[username] === hash) {
-        resolve({ user: username })
+      if (USERS[username] && USERS[username].hash === hash) {
+        resolve({ user: username, role: USERS[username].role })
       } else {
         reject(new Error('Invalid credentials'))
       }
     }, 500)
   })
 }
-//Až nasadíme backend, stačí nahradit fakeLogin() reálným fetch(), viz níže
+
+// Reálný login pro pozdější nasazení backendu
 /*
 export const realLogin = async (username, password) => {
   const hash = await hashPassword(password)

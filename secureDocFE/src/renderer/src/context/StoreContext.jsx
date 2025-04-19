@@ -6,10 +6,11 @@ const StoreContext = createContext()
 
 export const StoreProvider = ({ children }) => {
   const [user, setUser] = useState(null)
+  const [role, setRole] = useState(null)
   const [theme, setTheme] = useState('light')
 
   return (
-    <StoreContext.Provider value={{ user, setUser, theme, setTheme }}>
+    <StoreContext.Provider value={{ user, setUser, role, setRole, theme, setTheme }}>
       {children}
     </StoreContext.Provider>
   )

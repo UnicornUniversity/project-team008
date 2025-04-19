@@ -1,4 +1,3 @@
-// src/components/LoginModal.jsx
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { fakeLogin } from '../services/authService'
@@ -21,9 +20,9 @@ const LoginModal = ({ onClose, onLogin }) => {
     setError(null)
     try {
       const data = await fakeLogin(form.username, form.password)
-      onLogin(data.user)
+      onLogin(data.user, data.role)
       resetAndClose()
-      navigate('/user')
+      navigate(data.role === 'admin' ? '/admin' : '/files')
       // eslint-disable-next-line no-unused-vars
     } catch (err) {
       setError('Login failed. Please try again.')
