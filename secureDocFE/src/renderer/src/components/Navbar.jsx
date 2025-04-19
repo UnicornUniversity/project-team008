@@ -1,3 +1,4 @@
+//Navbar.jsx
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
@@ -7,6 +8,7 @@ import { FiSun, FiMoon } from 'react-icons/fi'
 const Navbar = () => {
   const { user, setUser, role, setRole, theme, setTheme } = useStore()
   const [showLogin, setShowLogin] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
   const navigate = useNavigate()
 
   const toggleTheme = () => {
@@ -16,6 +18,7 @@ const Navbar = () => {
   const handleLogout = () => {
     setUser(null)
     setRole(null)
+    setShowUserMenu(false)
     navigate('/')
   }
 
@@ -46,13 +49,7 @@ const Navbar = () => {
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          {!user ? (
-            <button onClick={() => setShowLogin(true)}>Login</button>
-          ) : (
-            <button onClick={handleLogout}>Logout</button>
-          )}
-
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative' }}>
           {/* Ikona pro přepnutí tématu */}
           <span
             onClick={toggleTheme}
@@ -69,7 +66,44 @@ const Navbar = () => {
             {theme === 'light' ? <FiMoon /> : <FiSun />}
           </span>
 
-          <div style={{ fontWeight: 'bold' }}>{user && `${user}`}</div>
+          {user && (
+            <div style={{ position: 'relative' }}>
+              <div
+                onClick={() => setShowUserMenu((prev) => !prev)}
+                style={{ fontWeight: 'bold', cursor: 'pointer' }}
+              >
+                {user}
+              </div>
+              {showUserMenu && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: '2rem',
+                    background: '#fff',
+                    border: '1px solid #ccc',
+                    borderRadius: '0.3rem',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                    zIndex: 1000
+                  }}
+                >
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      width: '100%',
+                      textAlign: 'left'
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </nav>
 

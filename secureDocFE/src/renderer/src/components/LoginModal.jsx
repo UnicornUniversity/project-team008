@@ -1,8 +1,10 @@
+// LoginModal.jsx
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { fakeLogin } from '../services/authService'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
+import '../assets/main.css'
 
 const LoginModal = ({ onClose, onLogin }) => {
   const [form, setForm] = useState({ username: '', password: '' })
@@ -42,8 +44,8 @@ const LoginModal = ({ onClose, onLogin }) => {
   }
 
   return (
-    <div style={modalStyles.overlay}>
-      <div style={modalStyles.content}>
+    <div className="login-modal-overlay">
+      <div className="login-modal-content">
         <h2>Login</h2>
         <form
           onSubmit={handleLoginSubmit}
@@ -66,17 +68,7 @@ const LoginModal = ({ onClose, onLogin }) => {
               required
               style={{ paddingRight: '2.5rem' }}
             />
-            <span
-              onClick={() => setShowPassword((prev) => !prev)}
-              style={{
-                position: 'absolute',
-                right: '0.8rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                cursor: 'pointer',
-                color: '#666'
-              }}
-            >
+            <span onClick={() => setShowPassword((prev) => !prev)} className="password-toggle-icon">
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
@@ -98,30 +90,6 @@ const LoginModal = ({ onClose, onLogin }) => {
       </div>
     </div>
   )
-}
-
-const modalStyles = {
-  overlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000
-  },
-  content: {
-    background: '#fff',
-    padding: '2rem',
-    borderRadius: '0.5rem',
-    minWidth: '300px',
-    boxShadow: '0 0 10px rgba(0,0,0,0.3)',
-    display: 'flex',
-    flexDirection: 'column'
-  }
 }
 
 LoginModal.propTypes = {
