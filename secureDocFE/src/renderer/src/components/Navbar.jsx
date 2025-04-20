@@ -41,7 +41,9 @@ const Navbar = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           {user && (
             <>
-              {role === 'admin' && <button onClick={() => navigate('/admin')}>Login Page</button>}
+              {role === 'admin' && (
+                <button onClick={() => navigate('/admin')}>Administration</button>
+              )}
               <button onClick={() => navigate('/files')}>File List</button>
               <button onClick={() => navigate('/files/detail')}>Detail</button>
               <button onClick={() => navigate('/files/download')}>Download</button>

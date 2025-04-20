@@ -1,19 +1,19 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { StoreProvider, useStore } from './context/StoreContext'
 import Navbar from './components/Navbar'
-import LoginPage from './pages/LoginPage'
+import AdminPage from './pages/AdminPage'
 import FileListPage from './pages/FileListPage'
 import FileDetail from './pages/FileDetail'
 import DownLoadPage from './pages/DownLoadPage'
-import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
 
 const AppRoutes = () => {
   const { user, role } = useStore()
 
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
-      {user && role === 'admin' && <Route path="/admin" element={<LoginPage />} />}
+      <Route path="/" element={<LoginPage />} />
+      {user && role === 'admin' && <Route path="/admin" element={<AdminPage />} />}
       {user && (
         <>
           <Route path="/files" element={<FileListPage />} />

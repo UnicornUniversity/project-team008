@@ -3,6 +3,7 @@ import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { fakeLogin } from '../services/authService'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
+import { FiRefreshCw } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import '../assets/main.css'
 
@@ -72,14 +73,27 @@ const LoginModal = ({ onClose, onLogin }) => {
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
-          <button type="submit">Submit</button>
+          <button type="submit">Log in</button>
           {error && <span style={{ color: 'red' }}>{error}</span>}
         </form>
 
         {form.username && (
-          <button onClick={handleForgotPassword} style={{ marginTop: '0.5rem' }}>
-            Forgot password?
-          </button>
+          <span
+            onClick={handleForgotPassword}
+            title="password recovery"
+            style={{
+              marginTop: '0.5rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              color: '#888',
+              fontSize: '0.95rem'
+            }}
+          >
+            <FiRefreshCw />
+            password recovery
+          </span>
         )}
 
         {notification && <div style={{ marginTop: '0.5rem', color: 'green' }}>{notification}</div>}
