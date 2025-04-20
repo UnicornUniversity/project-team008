@@ -1,0 +1,344 @@
+{
+  "info": {
+    "name": "SecureDoc API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.environment.set(\"token\", json.token);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "item": [
+        {
+          "name": "List Files",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "authorization-x", "value": "{{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/file",
+              "host": ["{{base_url}}"],
+              "path": ["file"]
+            }
+          }
+        },
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "authorization-x", "value": "{{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "file", "type": "file" }]
+            },
+            "url": {
+              "raw": "{{base_url}}/file",
+              "host": ["{{base_url}}"],
+              "path": ["file"]
+            }
+          }
+        },
+        {
+          "name": "Get File by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "authorization-x", "value": "{{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/file/:id",
+              "host": ["{{base_url}}"],
+              "path": ["file", ":id"],
+              "variable": [{ "key": "id", "value": "YOUR_FILE_ID" }]
+            }
+          }
+        },
+        {
+          "name": "Update File",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "authorization-x", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileName\": \"updated.pdf\",\n  \"localUrl\": \"/uploads/updated.pdf\",\n  \"size\": 12345,\n  \"owner\": \"YOUR_USER_ID\",\n  \"created_by\": \"YOUR_USER_ID\",\n  \"hardwarePinHash\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/file/:id",
+              "host": ["{{base_url}}"],
+              "path": ["file", ":id"],
+              "variable": [{ "key": "id", "value": "YOUR_FILE_ID" }]
+            }
+          }
+        },
+        {
+          "name": "Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "authorization-x", "value": "{{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/file/:id",
+              "host": ["{{base_url}}"],
+              "path": ["file", ":id"],
+              "variable": [{ "key": "id", "value": "YOUR_FILE_ID" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Download",
+      "item": [
+        {
+          "name": "Get Download Link",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "authorization-x", "value": "{{token}}" },
+              { "key": "hardware-pin", "value": "" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/download/:id",
+              "host": ["{{base_url}}"],
+              "path": ["download", ":id"],
+              "variable": [{ "key": "id", "value": "YOUR_FILE_ID" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "FileAccess",
+      "item": [
+        {
+          "name": "List File Access",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "authorization-x", "value": "{{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/file/:id/user",
+              "host": ["{{base_url}}"],
+              "path": ["file", ":id", "user"],
+              "variable": [{ "key": "id", "value": "YOUR_FILE_ID" }]
+            }
+          }
+        },
+        {
+          "name": "Grant File Access",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "authorization-x", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"YOUR_USER_ID\",\n  \"permission\": \"read\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/file/:id/user",
+              "host": ["{{base_url}}"],
+              "path": ["file", ":id", "user"],
+              "variable": [{ "key": "id", "value": "YOUR_FILE_ID" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "authorization-x", "value": "{{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/user",
+              "host": ["{{base_url}}"],
+              "path": ["user"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "authorization-x", "value": "{{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/user/:id",
+              "host": ["{{base_url}}"],
+              "path": ["user", ":id"],
+              "variable": [{ "key": "id", "value": "YOUR_USER_ID" }]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "authorization-x", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"new@example.com\",\n  \"role\": \"admin\",\n  \"password\": \"passwordUpdate\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/user/:id",
+              "host": ["{{base_url}}"],
+              "path": ["user", ":id"],
+              "variable": [{ "key": "id", "value": "YOUR_USER_ID" }]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "authorization-x", "value": "{{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/user/:id",
+              "host": ["{{base_url}}"],
+              "path": ["user", ":id"],
+              "variable": [{ "key": "id", "value": "YOUR_USER_ID" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Arduino",
+      "item": [
+        {
+          "name": "List Arduino Configs",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "authorization-x", "value": "{{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/arduino",
+              "host": ["{{base_url}}"],
+              "path": ["arduino"]
+            }
+          }
+        },
+        {
+          "name": "Create Arduino Config",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "authorization-x", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consoleHash\": \"exampleHash\",\n  \"enabled\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/arduino",
+              "host": ["{{base_url}}"],
+              "path": ["arduino"]
+            }
+          }
+        },
+        {
+          "name": "Get Arduino Config",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "authorization-x", "value": "{{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/arduino/:id",
+              "host": ["{{base_url}}"],
+              "path": ["arduino", ":id"],
+              "variable": [{ "key": "id", "value": "YOUR_CONFIG_ID" }]
+            }
+          }
+        },
+        {
+          "name": "Update Arduino Config",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "authorization-x", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/arduino/:id",
+              "host": ["{{base_url}}"],
+              "path": ["arduino", ":id"],
+              "variable": [{ "key": "id", "value": "YOUR_CONFIG_ID" }]
+            }
+          }
+        },
+        {
+          "name": "Delete Arduino Config",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "authorization-x", "value": "{{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/arduino/:id",
+              "host": ["{{base_url}}"],
+              "path": ["arduino", ":id"],
+              "variable": [{ "key": "id", "value": "YOUR_CONFIG_ID" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

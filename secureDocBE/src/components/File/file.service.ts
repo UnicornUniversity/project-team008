@@ -1,0 +1,60 @@
+// File: src/components/File/file.service.ts
+import { File } from './file.model'
+import path from 'path'
+import fs from 'fs'
+import bcrypt from 'bcrypt'
+import { Request } from 'express'
+import dotenv from 'dotenv'
+dotenv.config()
+
+export class FileService {
+  static async listAll() {
+    return File.findAll()
+  }
+
+  static async upload(req: Request) {
+    if (!req.file) throw new Error('No file uploaded')
+    const { filename, size, path: tmpPath } = req.file as any
+    const dest = path.join(__dirname, '../../../uploads', filename)
+    fs.renameSync(tmpPath, dest)
+    const file = await File.create({
+      fileName: filename,
+      localUrl: dest,
+      size,
+      owner: req.user!.id,
+      hardwarePinHash: null,
+      createdBy: req.user!.id,
+    })
+    return file
+  }
+
+  static async getById(id: string) {
+    const f = await File.findByPk(id)
+    if (!f) throw new Error('Not found')
+    return f
+  }
+
+  static async update(id: string, data: any) {
+    const [cnt, [updated]] = await File.update(data, {
+      where: { id },
+      returning: true,
+    })
+    if (!cnt) throw new Error('Not found')
+    return updated
+  }
+
+  static async delete(id: string) {
+    const cnt = await File.destroy({ where: { id } })
+    if (!cnt) throw new Error('Not found')
+  }
+
+  static async setHardwarePin(id: string, pin: string) {
+    const salt = await bcrypt.genSalt()
+    const hash = await bcrypt.hash(pin, salt)
+    const file = await File.findByPk(id)
+    if (!file) throw new Error('Not found')
+    file.hardwarePinHash = hash
+    await file.save()
+    return file
+  }
+}
