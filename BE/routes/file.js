@@ -11,7 +11,7 @@ router.post(
   fileController.uploadFile
 );
 
-router.get("/", authenticateToken, fileController.getFiles);
+router.get("/file", authenticateToken, fileController.getFiles);
 
 router.get("/:id", authenticateToken, fileController.getFileById);
 
