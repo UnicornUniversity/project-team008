@@ -3,11 +3,18 @@ const { v4: uuidv4 } = require("uuid");
 
 async function createUser(email, hashedPassword, role = "user") {
   const id = uuidv4();
-  const [result] = await pool.query(
-    `INSERT INTO users (id, email, password, role) VALUES (?, ?, ?, ?)`,
-    [id, email, hashedPassword, role]
-  );
-  return { id, email, role };
+  try {
+    console.log("🛠️ INSERT uživatele:", email);
+    const [result] = await pool.query(
+      `INSERT INTO users (id, email, password, role) VALUES (?, ?, ?, ?)`,
+      [id, email, hashedPassword, role]
+    );
+    console.log("✅ Uživatel zapsán do DB");
+    return { id, email, role };
+  } catch (err) {
+    console.error("❌ Chyba v createUser:", err.message, err.stack);
+    throw err;
+  }
 }
 
 async function getUserByEmail(email) {
@@ -23,16 +30,10 @@ async function getUserById(id) {
 }
 
 async function findByEmail(email) {
-  return new Promise((resolve, reject) => {
-    pool.query(
-      "SELECT * FROM users WHERE email = ?",
-      [email],
-      (err, results) => {
-        if (err) return reject(err);
-        resolve(results[0]); // nebo podle potřeby
-      }
-    );
-  });
+  const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [
+    email,
+  ]);
+  return rows[0];
 }
 
 module.exports = {
