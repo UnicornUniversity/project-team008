@@ -17,7 +17,7 @@ const LoginPage = () => {
   return (
     <div style={{ padding: '2rem', textAlign: 'center' }}>
       <h3>Welcome to SecureDoc</h3>
-
+      <div> {import.meta.env.VITE_API_PATH} </div>
       <div
         style={{
           marginTop: '2rem',

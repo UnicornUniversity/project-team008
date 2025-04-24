@@ -3,6 +3,7 @@ import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
+  envPrefix: ['VITE_', 'REACT_APP_'],
   main: {
     plugins: [externalizeDepsPlugin()]
   },
