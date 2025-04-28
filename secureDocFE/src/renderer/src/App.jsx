@@ -9,7 +9,6 @@ import LoginPage from './pages/LoginPage'
 
 const AppRoutes = () => {
   const { user, role } = useStore()
-
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />

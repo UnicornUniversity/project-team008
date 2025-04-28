@@ -2,8 +2,11 @@ import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 import '../assets/main.css'
+import { registerUser } from '../services/authService'
+import { useNavigate } from 'react-router-dom'
+import { getLoggedUser, realLogin } from '../services/authService'
 
-const RegisterModal = ({ onClose }) => {
+const RegisterModal = ({ onClose, onLogin }) => {
   const [form, setForm] = useState({
     username: '',
     email: '',
@@ -14,6 +17,7 @@ const RegisterModal = ({ onClose }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [notification, setNotification] = useState('')
   const [error, setError] = useState(null)
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -23,10 +27,10 @@ const RegisterModal = ({ onClose }) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault()
 
-    if (!form.username || !form.email || !form.password || !form.confirmPassword) {
+    if ( !form.email || !form.password || !form.confirmPassword) {
       setError('Please fill in all fields')
       return
     }
@@ -41,11 +45,22 @@ const RegisterModal = ({ onClose }) => {
       return
     }
 
-    console.log('Registration request sent:', form)
-    setNotification('Registration request sent to the administrator.')
-    setTimeout(() => {
-      resetAndClose()
-    }, 3000)
+    const data = await registerUser(form.email, form.password)
+    console.log(data)
+    if (data.error == undefined) {
+      const data = await realLogin(form.email, form.password)
+
+      if (data.token != undefined) {
+        const user = await getLoggedUser(data.token)
+        onLogin(user.email, user.role, data.token, user)
+        resetAndClose()
+        navigate(data.role === 'admin' ? '/admin' : '/files')
+      } else {
+        setError(data.error)
+      }
+    } else {
+      setNotification('Could not register.')
+    }
   }
 
   const resetAndClose = () => {
@@ -63,13 +78,7 @@ const RegisterModal = ({ onClose }) => {
           onSubmit={handleRegisterSubmit}
           style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
         >
-          <input
-            name="username"
-            placeholder="Username"
-            value={form.username}
-            onChange={handleChange}
-            required
-          />
+        
           <input
             name="email"
             type="email"

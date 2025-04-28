@@ -1,11 +1,13 @@
 // LoginModal.jsx
 import { useState } from 'react'
 import PropTypes from 'prop-types'
-import { fakeLogin } from '../services/authService'
-import { FaEye, FaEyeSlash } from 'react-icons/fa'
+import { getLoggedUser, realLogin } from '../services/authService'
 import { FiRefreshCw } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import '../assets/main.css'
+import { Button, TextField } from '@mui/material'
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 
 const LoginModal = ({ onClose, onLogin }) => {
   const [form, setForm] = useState({ username: '', password: '' })
@@ -22,13 +24,21 @@ const LoginModal = ({ onClose, onLogin }) => {
     e.preventDefault()
     setError(null)
     try {
-      const data = await fakeLogin(form.username, form.password)
-      onLogin(data.user, data.role)
-      resetAndClose()
-      navigate(data.role === 'admin' ? '/admin' : '/files')
+      const data = await realLogin(form.username, form.password)
+
+      if (data.token != undefined) {
+        const user = await getLoggedUser(data.token)
+        onLogin(user.email, user.role, data.token, user)
+        resetAndClose()
+        navigate(data.role === 'admin' ? '/admin' : '/files')
+      } else {
+        setError(data.error)
+      }
+
       // eslint-disable-next-line no-unused-vars
     } catch (err) {
-      setError('Login failed. Please try again.')
+      //setError('Login failed. Please try again.')
+      setError(err)
     }
   }
 
@@ -52,7 +62,7 @@ const LoginModal = ({ onClose, onLogin }) => {
           onSubmit={handleLoginSubmit}
           style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
         >
-          <input
+          <TextField //pouzit materialUI : mui.com
             name="username"
             placeholder="Username"
             value={form.username}
@@ -60,7 +70,7 @@ const LoginModal = ({ onClose, onLogin }) => {
             required
           />
           <div style={{ position: 'relative' }}>
-            <input
+            <TextField
               name="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="Password"
@@ -70,10 +80,10 @@ const LoginModal = ({ onClose, onLogin }) => {
               style={{ paddingRight: '2.5rem' }}
             />
             <span onClick={() => setShowPassword((prev) => !prev)} className="password-toggle-icon">
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
+              {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
             </span>
           </div>
-          <button type="submit">Log in</button>
+          <Button type="submit">Log in</Button>
           {error && <span style={{ color: 'red' }}>{error}</span>}
         </form>
 
@@ -98,9 +108,9 @@ const LoginModal = ({ onClose, onLogin }) => {
 
         {notification && <div style={{ marginTop: '0.5rem', color: 'green' }}>{notification}</div>}
 
-        <button onClick={resetAndClose} style={{ marginTop: '0.5rem' }}>
+        <Button onClick={resetAndClose} style={{ marginTop: '0.5rem' }}>
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   )
