@@ -1,11 +1,22 @@
 // LoginModal.jsx
 import { useState } from 'react'
 import PropTypes from 'prop-types'
-import { fakeLogin } from '../services/authService'
-import { FaEye, FaEyeSlash } from 'react-icons/fa'
+import { getLoggedUser, realLogin } from '../services/authService'
 import { FiRefreshCw } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import '../assets/main.css'
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  InputAdornment,
+  IconButton,
+  Typography,
+  Box
+} from '@mui/material'
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 
 const LoginModal = ({ onClose, onLogin }) => {
   const [form, setForm] = useState({ username: '', password: '' })
@@ -19,16 +30,25 @@ const LoginModal = ({ onClose, onLogin }) => {
   }
 
   const handleLoginSubmit = async (e) => {
+    console.log(e)
     e.preventDefault()
     setError(null)
     try {
-      const data = await fakeLogin(form.username, form.password)
-      onLogin(data.user, data.role)
-      resetAndClose()
-      navigate(data.role === 'admin' ? '/admin' : '/files')
+      const data = await realLogin(form.username, form.password)
+
+      if (data.token != undefined) {
+        const user = await getLoggedUser(data.token)
+        onLogin(user.email, user.role, data.token, user)
+        resetAndClose()
+        navigate(data.role === 'admin' ? '/admin' : '/files')
+      } else {
+        setError(data.error)
+      }
+
       // eslint-disable-next-line no-unused-vars
     } catch (err) {
-      setError('Login failed. Please try again.')
+      //setError('Login failed. Please try again.')
+      setError(err)
     }
   }
 
@@ -45,38 +65,68 @@ const LoginModal = ({ onClose, onLogin }) => {
   }
 
   return (
-    <div className="login-modal-overlay">
-      <div className="login-modal-content">
-        <h2>Login</h2>
+    <div className="login-modal-overlay ">
+      <div className="login-modal-content modal">
+        <Typography variant="h4">Login</Typography>
         <form
           onSubmit={handleLoginSubmit}
           style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
         >
-          <input
+          <InputLabel
+            className="modal-label"
+            htmlFor="outlined-adornment-email"
+            sx={{ textAlign: 'left' }}
+          >
+            Email
+          </InputLabel>
+          <OutlinedInput
+            className="modal-input"
+            id="outlined-adornment-email"
             name="username"
-            placeholder="Username"
+            placeholder="Email"
             value={form.username}
             onChange={handleChange}
-            required
+            required={true}
           />
           <div style={{ position: 'relative' }}>
-            <input
-              name="password"
+            <InputLabel
+              className="modal-label"
+              htmlFor="outlined-adornment-password"
+              sx={{ textAlign: 'left' }}
+            >
+              Password
+            </InputLabel>
+            <OutlinedInput
+              className="modal-input"
+              id="outlined-adornment-password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
-              value={form.password}
+              name="password"
               onChange={handleChange}
-              required
-              style={{ paddingRight: '2.5rem' }}
+              value={form.password}
+              required={true}
+              placeholder="Password"
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={showPassword ? 'hide the password' : 'display the password'}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </IconButton>
+                </InputAdornment>
+              }
             />
-            <span onClick={() => setShowPassword((prev) => !prev)} className="password-toggle-icon">
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </span>
           </div>
-          <button type="submit">Log in</button>
-          {error && <span style={{ color: 'red' }}>{error}</span>}
+          <Button variant="contained" type="submit">
+            Log in
+          </Button>
         </form>
 
+        <Button variant="contained" onClick={resetAndClose} style={{ marginTop: '0.5rem' }}>
+          Cancel
+        </Button>
+        {error && <span style={{ color: 'red' }}>{error}</span>}
         {form.username && (
           <span
             onClick={handleForgotPassword}
@@ -84,8 +134,6 @@ const LoginModal = ({ onClose, onLogin }) => {
             style={{
               marginTop: '0.5rem',
               cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
               gap: '0.3rem',
               color: '#888',
               fontSize: '0.95rem'
@@ -97,10 +145,6 @@ const LoginModal = ({ onClose, onLogin }) => {
         )}
 
         {notification && <div style={{ marginTop: '0.5rem', color: 'green' }}>{notification}</div>}
-
-        <button onClick={resetAndClose} style={{ marginTop: '0.5rem' }}>
-          Cancel
-        </button>
       </div>
     </div>
   )
