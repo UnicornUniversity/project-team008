@@ -5,7 +5,16 @@ import { getLoggedUser, realLogin } from '../services/authService'
 import { FiRefreshCw } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import '../assets/main.css'
-import { Button, TextField } from '@mui/material'
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  InputAdornment,
+  IconButton,
+  Typography,
+  Box
+} from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 
@@ -21,6 +30,7 @@ const LoginModal = ({ onClose, onLogin }) => {
   }
 
   const handleLoginSubmit = async (e) => {
+    console.log(e)
     e.preventDefault()
     setError(null)
     try {
@@ -55,38 +65,68 @@ const LoginModal = ({ onClose, onLogin }) => {
   }
 
   return (
-    <div className="login-modal-overlay">
-      <div className="login-modal-content">
-        <h2>Login</h2>
+    <div className="login-modal-overlay ">
+      <div className="login-modal-content modal">
+        <Typography variant="h4">Login</Typography>
         <form
           onSubmit={handleLoginSubmit}
           style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
         >
-          <TextField //pouzit materialUI : mui.com
+          <InputLabel
+            className="modal-label"
+            htmlFor="outlined-adornment-email"
+            sx={{ textAlign: 'left' }}
+          >
+            Email
+          </InputLabel>
+          <OutlinedInput
+            className="modal-input"
+            id="outlined-adornment-email"
             name="username"
-            placeholder="Username"
+            placeholder="Email"
             value={form.username}
             onChange={handleChange}
-            required
+            required={true}
           />
           <div style={{ position: 'relative' }}>
-            <TextField
-              name="password"
+            <InputLabel
+              className="modal-label"
+              htmlFor="outlined-adornment-password"
+              sx={{ textAlign: 'left' }}
+            >
+              Password
+            </InputLabel>
+            <OutlinedInput
+              className="modal-input"
+              id="outlined-adornment-password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
-              value={form.password}
+              name="password"
               onChange={handleChange}
-              required
-              style={{ paddingRight: '2.5rem' }}
+              value={form.password}
+              required={true}
+              placeholder="Password"
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={showPassword ? 'hide the password' : 'display the password'}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </IconButton>
+                </InputAdornment>
+              }
             />
-            <span onClick={() => setShowPassword((prev) => !prev)} className="password-toggle-icon">
-              {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-            </span>
           </div>
-          <Button type="submit">Log in</Button>
-          {error && <span style={{ color: 'red' }}>{error}</span>}
+          <Button variant="contained" type="submit">
+            Log in
+          </Button>
         </form>
 
+        <Button variant="contained" onClick={resetAndClose} style={{ marginTop: '0.5rem' }}>
+          Cancel
+        </Button>
+        {error && <span style={{ color: 'red' }}>{error}</span>}
         {form.username && (
           <span
             onClick={handleForgotPassword}
@@ -94,8 +134,6 @@ const LoginModal = ({ onClose, onLogin }) => {
             style={{
               marginTop: '0.5rem',
               cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
               gap: '0.3rem',
               color: '#888',
               fontSize: '0.95rem'
@@ -107,10 +145,6 @@ const LoginModal = ({ onClose, onLogin }) => {
         )}
 
         {notification && <div style={{ marginTop: '0.5rem', color: 'green' }}>{notification}</div>}
-
-        <Button onClick={resetAndClose} style={{ marginTop: '0.5rem' }}>
-          Cancel
-        </Button>
       </div>
     </div>
   )

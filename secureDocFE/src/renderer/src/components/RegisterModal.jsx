@@ -5,6 +5,17 @@ import '../assets/main.css'
 import { registerUser } from '../services/authService'
 import { useNavigate } from 'react-router-dom'
 import { getLoggedUser, realLogin } from '../services/authService'
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  InputAdornment,
+  IconButton,
+  Typography
+} from '@mui/material'
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 
 const RegisterModal = ({ onClose, onLogin }) => {
   const [form, setForm] = useState({
@@ -30,7 +41,7 @@ const RegisterModal = ({ onClose, onLogin }) => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault()
 
-    if ( !form.email || !form.password || !form.confirmPassword) {
+    if (!form.email || !form.password || !form.confirmPassword) {
       setError('Please fill in all fields')
       return
     }
@@ -72,66 +83,103 @@ const RegisterModal = ({ onClose, onLogin }) => {
 
   return (
     <div className="login-modal-overlay">
-      <div className="login-modal-content">
-        <h2>Register</h2>
+      <div className="login-modal-content modal">
+        <Typography variant="h4">Register</Typography>
         <form
           onSubmit={handleRegisterSubmit}
           style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
         >
-        
-          <input
+          <InputLabel className="modal-label" htmlFor="outlined-email" sx={{ textAlign: 'left' }}>
+            Email
+          </InputLabel>
+          <OutlinedInput
+            className="modal-input"
+            id="outlined-email"
             name="email"
             type="email"
             placeholder="Email"
             value={form.email}
             onChange={handleChange}
-            required
+            required={true}
           />
 
           {/* Password Field */}
           <div style={{ position: 'relative' }}>
-            <input
+            <InputLabel
+              className="modal-label"
+              htmlFor="outlined-password"
+              sx={{ textAlign: 'left' }}
+            >
+              Password
+            </InputLabel>
+            <OutlinedInput
+              className="modal-input"
+              id="outlined-password"
               name="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="Password"
               value={form.password}
               onChange={handleChange}
-              required
+              required={true}
               style={{ paddingRight: '2.5rem' }}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={showPassword ? 'hide the password' : 'display the password'}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </IconButton>
+                </InputAdornment>
+              }
             />
-            <span onClick={() => setShowPassword((prev) => !prev)} className="password-toggle-icon">
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </span>
           </div>
 
           {/* Confirm Password Field */}
           <div style={{ position: 'relative' }}>
-            <input
+            <InputLabel
+              className="modal-label"
+              htmlFor="outlined-confirm-password"
+              sx={{ textAlign: 'left' }}
+            >
+              Confirm Password
+            </InputLabel>
+            <OutlinedInput
+              className="modal-input"
+              id="outlined-confirm-password"
               name="confirmPassword"
               type={showConfirmPassword ? 'text' : 'password'}
               placeholder="Confirm Password"
               value={form.confirmPassword}
               onChange={handleChange}
-              required
+              required={true}
               style={{ paddingRight: '2.5rem' }}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={showConfirmPassword ? 'hide the password' : 'display the password'}
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    edge="end"
+                  >
+                    {showConfirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </IconButton>
+                </InputAdornment>
+              }
             />
-            <span
-              onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="password-toggle-icon"
-            >
-              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-            </span>
           </div>
 
-          <button type="submit">Sign up</button>
+          <Button variant="contained" type="submit">
+            Sign up
+          </Button>
           {error && <span style={{ color: 'red' }}>{error}</span>}
         </form>
 
         {notification && <div style={{ marginTop: '0.5rem', color: 'green' }}>{notification}</div>}
 
-        <button onClick={resetAndClose} style={{ marginTop: '0.5rem' }}>
+        <Button variant="contained" onClick={resetAndClose} style={{ marginTop: '0.5rem' }}>
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   )
