@@ -16,7 +16,20 @@ function createWindow() {
       sandbox: false
     }
   })
-  //mainWindow.webContents.openDevTools()
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Open DevTools',
+      click: () => {
+        mainWindow.webContents.openDevTools({ mode: 'detach' })
+      }
+    }
+  ])
+
+  mainWindow.webContents.on('context-menu', () => {
+    contextMenu.popup()
+  })
+
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
