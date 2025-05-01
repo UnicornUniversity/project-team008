@@ -8,9 +8,10 @@ export const StoreProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [role, setRole] = useState(null)
   const [theme, setTheme] = useState('light')
-
+  const [token, setToken] = useState(null)
+  const [userObject, setUserObject] = useState(null)
   return (
-    <StoreContext.Provider value={{ user, setUser, role, setRole, theme, setTheme }}>
+    <StoreContext.Provider value={{ user, setUser, role, setRole, theme, setTheme, token, setToken, userObject, setUserObject }}>
       {children}
     </StoreContext.Provider>
   )

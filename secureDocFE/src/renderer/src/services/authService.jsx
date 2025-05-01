@@ -1,4 +1,5 @@
 // Mock uživatelé s hashovanými hesly a rolemi
+
 const USERS = {
   admin: {
     hash: '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', // '1234'
@@ -9,6 +10,9 @@ const USERS = {
     role: 'user'
   }
 }
+
+
+const API = "http://localhost:3000"
 
 export const hashPassword = async (password) => {
   const encoder = new TextEncoder()
@@ -33,16 +37,36 @@ export const fakeLogin = async (username, password) => {
 }
 
 // Reálný login pro pozdější nasazení backendu
-/*
+
 export const realLogin = async (username, password) => {
-  const hash = await hashPassword(password)
-  const res = await fetch('/api/login', {
+  console.log(API)
+  const res = await fetch(`${API}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, passwordHash: hash })
+    body: JSON.stringify({ email: username, password })
   })
-
-  if (!res.ok) throw new Error('Unauthorized')
+  console.log(API)
+  if (!res.ok) return { error: 'Incorrect Credentials!' }
   return await res.json()
 }
-*/
+
+export const getLoggedUser = async (token) => {
+  const res = await fetch(`${API}/user/me`, {
+    method: 'GET',
+    headers: {
+      'authorization-x': token
+    }
+  })
+  if (!res.ok) return { error: 'Wrong!' }
+  return await res.json()
+}
+
+export const registerUser = async (email, password) => {
+  const res = await fetch(`${API}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  })
+  if (!res.ok) return { error: 'Wrong' }
+  return await res.json()
+}
