@@ -17,7 +17,8 @@ const AppRoutes = () => {
       {user && (
         <>
           <Route path="/files" element={<FileListPage />} />
-          <Route path="/files/detail" element={<FileDetail />} />
+          <Route path="/files/detail/:id" element={<FileDetail />} />
+
           <Route path="/files/download" element={<DownLoadPage />} />
         </>
       )}
