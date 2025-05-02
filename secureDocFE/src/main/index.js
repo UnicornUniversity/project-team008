@@ -3,55 +3,33 @@ import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { SerialPort } from 'serialport'
-import { ReadlineParser } from '@serialport/parser-readline'
 import * as net from 'net'
 
-let arduinoPort
 let mockSocket
+let retry = 1000
 
-async function startSerial() {
-  try {
-    const envPath = (process.env.ARDUINO_PORT || '').trim()
-    let path = envPath || undefined
-    if (!path) {
-      const ports = await SerialPort.list()
-      const cand = ports.find(
-        (p) =>
-          /arduino|usbmodem|usbserial/i.test(p.manufacturer ?? '') ||
-          /ttyACM|ttyUSB|COM\d+/i.test(p.path)
-      )
-      path = cand?.path
-    }
-    if (!path) {
-      console.log('[SERIAL] none')
-      return
-    }
-    arduinoPort = new SerialPort({ path, baudRate: 9600 })
-    const parser = arduinoPort.pipe(new ReadlineParser({ delimiter: '\n' }))
-    parser.on('data', (l) => broadcast(l.toString().trim()))
-    arduinoPort.on('error', (e) => console.error(e.message))
-    console.log('[SERIAL]', path)
-  } catch (e) {
-    console.error(e.message)
+function connectMock() {
+  mockSocket = net.connect(8123, '127.0.0.1')
+  mockSocket.once('connect', () => {
+    retry = 1000
+  })
+  mockSocket.on('data', (b) => {
+    const line = b.toString().trim()
+    if (!line) return
+    BrowserWindow.getAllWindows().forEach((w) => w.webContents.send('arduino-line', line))
+  })
+  const retryLater = () => {
+    if (mockSocket) mockSocket.destroy()
+    mockSocket = null
+    retry = Math.min(retry * 2, 30000)
+    setTimeout(connectMock, retry)
   }
+  mockSocket.once('error', retryLater)
+  mockSocket.once('close', retryLater)
 }
 
 function startMock() {
-  const reconnect = () => {
-    mockSocket = net.connect(8123, '127.0.0.1')
-    mockSocket.on('error', () => setTimeout(reconnect, 1000))
-    mockSocket.on('close', () => setTimeout(reconnect, 1000))
-    mockSocket.on('data', (b) => broadcast(b.toString().trim()))
-  }
-  reconnect()
-  console.log('[MOCK] tcp 8123')
-}
-
-function broadcast(line) {
-  if (!line) return
-  console.log('[KEYPAD]', line)
-  BrowserWindow.getAllWindows().forEach((w) => w.webContents.send('arduino-line', line))
+  connectMock()
 }
 
 function createWindow() {
@@ -90,15 +68,9 @@ app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
   app.on('browser-window-created', (_, w) => optimizer.watchWindowShortcuts(w))
   ipcMain.on('arduino-write', (_, d) => {
-    const msg = `${d}\n`
-    if (arduinoPort?.writable) arduinoPort.write(msg)
-    if (mockSocket?.writable) mockSocket.write(msg)
+    if (mockSocket?.writable) mockSocket.write(`${d}\n`)
   })
-  if (process.env.MOCK_ARDUINO) {
-    startMock()
-  } else {
-    startSerial()
-  }
+  if (process.env.MOCK_ARDUINO) startMock()
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
