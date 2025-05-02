@@ -36,16 +36,19 @@ const LoginPage = () => {
             boxShadow: '10px 10px 20px 10px gray'
           }}
         >
-          The system employs a zero-trust, multi-layered security model for managing classified
-          digital assets in the cloud. Documents are securely ingested and encrypted using SHA-256
-          with user-specific hardware-derived keys. <br />
-          Users are authenticated via a hardware token and a PIN, entered through a secure device,
-          hashed locally, and transmitted over encrypted Wi-Fi. Role-based access control (RBAC)
-          governs document access, enforced through dual-factor validation of the hashed PIN and
-          hardware token.
-          <br />A secure recovery process handles lost hardware via OTP verification and admin
-          approval, with all actions immutably logged. Admins manage credentials, review security
-          events, and audit logs.
+          <ul>
+            <li>Zero-trust, multi-layered security model for cloud-hosted classified assets</li>
+            <li>
+              Documents ingested and encrypted with SHA-256 using user-specific hardware-derived
+              keys
+            </li>
+            <li>User authentication via hardware token + PIN entered on a secure device</li>
+            <li>PIN hashed locally; credentials sent only over encrypted Wi-Fi</li>
+            <li>
+              Role-based access control enforced through dual-factor validation of hashed PIN and
+              hardware token
+            </li>
+          </ul>
         </Typography>
       </div>
       <div style={{ marginTop: '10px' }}>
