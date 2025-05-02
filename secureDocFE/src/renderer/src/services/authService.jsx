@@ -11,8 +11,7 @@ const USERS = {
   }
 }
 
-
-const API = "http://localhost:3000"
+const API = import.meta.env.VITE_API_PATH
 
 export const hashPassword = async (password) => {
   const encoder = new TextEncoder()
