@@ -2,6 +2,7 @@ import { Box, Typography, Button, CircularProgress, Stack, Snackbar, Alert } fro
 import { ArrowBack } from '@mui/icons-material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { KeypadListener } from '../components/KeypadListener'
 
 const DownLoadPage = () => {
   const navigate = useNavigate()
@@ -52,6 +53,8 @@ const DownLoadPage = () => {
           Download completed successfully!
         </Alert>
       </Snackbar>
+
+      <KeypadListener />
     </Box>
   )
 }

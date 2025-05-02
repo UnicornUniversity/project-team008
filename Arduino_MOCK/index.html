@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Keypad Mock</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #e7eef7;
+        font-family: sans-serif;
+        margin: 0;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 60px);
+        grid-gap: 8px;
+      }
+      button {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+        border: none;
+        border-radius: 6px;
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+      }
+      button:active {
+        transform: translateY(2px);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grid" id="pad"></div>
+    <script>
+      const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"];
+      const pad = document.getElementById("pad");
+      keys.forEach((k) => {
+        const b = document.createElement("button");
+        b.textContent = k;
+        b.onclick = () => window.api.sendKey(k);
+        pad.appendChild(b);
+      });
+    </script>
+  </body>
+</html>
