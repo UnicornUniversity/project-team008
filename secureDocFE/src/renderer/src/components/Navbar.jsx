@@ -45,7 +45,8 @@ const Navbar = () => {
                 <button onClick={() => navigate('/admin')}>Administration</button>
               )}
               <button onClick={() => navigate('/files')}>File List</button>
-              <button onClick={() => navigate('/files/detail')}>Detail</button>
+              <button onClick={() => navigate('/files/detail/1')}>Detail</button>
+
               <button onClick={() => navigate('/files/download')}>Download</button>
             </>
           )}
