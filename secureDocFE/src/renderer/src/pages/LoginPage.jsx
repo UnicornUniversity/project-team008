@@ -1,80 +1,49 @@
-import { useState } from 'react'
-import LoginModal from '../components/LoginModal'
-import RegisterModal from '../components/RegisterModal'
-import { useStore } from '../context/StoreContext'
-import { Button, Typography } from '@mui/material'
+import React, { useState } from 'react'
+import { Box, Button } from '@mui/material'
+import AuthModal from '../components/AuthModal'
+import logo from '../assets/logo.png'
+import LockIcon from '@mui/icons-material/LockOutlined'
 
 const LoginPage = () => {
-  const { setUser, setRole, setToken, setUserObject } = useStore()
-  const [showLogin, setShowLogin] = useState(false)
-  const [showRegister, setShowRegister] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [mode, setMode] = useState('login')
 
-  const handleLogin = (user, role, token, userObject) => {
-    console.log(token, userObject)
-    setUser(user)
-    setRole(role)
-    setToken(token)
-    setUserObject(userObject)
-    setShowLogin(false)
-    console.log('handleLogin')
+  const handleOpen = (m) => {
+    setMode(m)
+    setOpen(true)
   }
+  const handleClose = () => setOpen(false)
 
   return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <Typography variant="h2">Welcome to SecureDoc</Typography>
-      <div style={{}}>
-        <Typography
-          variant="h6"
-          className="description-card"
-          sx={{
-            width: '600px',
-            margin: 'auto',
-            padding: '25px',
-            borderRadius: '25px',
-            marginTop: '10px',
-            marginBottom: '30px',
-            boxShadow: '10px 10px 20px 10px gray'
-          }}
-        >
-          <ul>
-            <li>Zero-trust, multi-layered security model for cloud-hosted classified assets</li>
-            <li>
-              Documents ingested and encrypted with SHA-256 using user-specific hardware-derived
-              keys
-            </li>
-            <li>User authentication via hardware token + PIN entered on a secure device</li>
-            <li>PIN hashed locally; credentials sent only over encrypted Wi-Fi</li>
-            <li>
-              Role-based access control enforced through dual-factor validation of hashed PIN and
-              hardware token
-            </li>
-          </ul>
-        </Typography>
-      </div>
-      <div style={{ marginTop: '10px' }}>
-        <Button
-          size="large"
-          variant="contained"
-          sx={{ height: '60px', fontSize: '22px', marginRight: '10px' }}
-          onClick={() => setShowLogin(true)}
-        >
-          Login
-        </Button>
-        <Button
-          size="large"
-          variant="contained"
-          sx={{ height: '60px', fontSize: '22px' }}
-          onClick={() => setShowRegister(true)}
-        >
-          Register
-        </Button>
-      </div>
+    <Box
+      sx={{
+        height: 'calc(100vh - 20px)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: 2,
+        bgcolor: 'background.default'
+      }}
+    >
+      <Box component="img" src={logo} alt="SecureDoc Logo" sx={{ width: 250, mb: 4, mt: -4 }} />
 
-      {showLogin && <LoginModal onClose={() => setShowLogin(false)} onLogin={handleLogin} />}
-      {showRegister && (
-        <RegisterModal onClose={() => setShowRegister(false)} onLogin={handleLogin} />
-      )}
-    </div>
+      <Button
+        startIcon={<LockIcon />}
+        sx={{ mt: -6 }}
+        variant="outlined"
+        onClick={() => handleOpen('login')}
+      >
+        Unlock
+      </Button>
+
+      <AuthModal
+        open={open}
+        mode={mode}
+        onClose={handleClose}
+        onSwitchMode={() => setMode((prev) => (prev === 'login' ? 'register' : 'login'))}
+      />
+    </Box>
   )
 }
 

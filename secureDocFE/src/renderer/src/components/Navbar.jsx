@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
-import LoginModal from './LoginModal'
 import { FiSun, FiMoon } from 'react-icons/fi'
 
 const Navbar = () => {

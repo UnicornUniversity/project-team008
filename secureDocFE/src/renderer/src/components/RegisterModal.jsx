@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
-import '../assets/main.css'
 import { registerUser } from '../services/authService'
 import { useNavigate } from 'react-router-dom'
 import { getLoggedUser, realLogin } from '../services/authService'
