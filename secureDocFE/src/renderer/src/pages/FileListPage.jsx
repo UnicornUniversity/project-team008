@@ -32,7 +32,10 @@ const FileListPage = () => {
 
   useEffect(() => {
     fetchFiles()
+    console.log('Fetching files...')
   }, [])
+  
+
 
   const handleFileClick = (fileId) => {
     navigate(`/files/detail/${fileId}`)
