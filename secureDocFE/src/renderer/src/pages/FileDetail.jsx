@@ -3,7 +3,7 @@ import { ArrowBack } from '@mui/icons-material'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useStore } from '../context/StoreContext'
-import { getFileById, getDownloadLink } from '../services/fileService'
+import { getFileById, getDownloadLink, downloadFile } from '../services/fileService'
 
 const FileDetail = () => {
   const navigate = useNavigate()
@@ -35,7 +35,7 @@ const FileDetail = () => {
   const handleDownload = async () => {
     try {
       const url = await getDownloadLink(fileData.id, token)
-      window.open(url, '_blank')
+      const download = await downloadFile(url, token, fileData.fileName)
     } catch (err) {
       alert('Download failed: ' + err.message)
     }
