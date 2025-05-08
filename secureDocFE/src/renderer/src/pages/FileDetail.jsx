@@ -3,7 +3,7 @@ import { ArrowBack } from '@mui/icons-material'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useStore } from '../context/StoreContext'
-import { getFileById, getDownloadLink } from '../services/fileService'
+import { getFileById, getDownloadLink, deleteFile } from '../services/fileService'
 
 const FileDetail = () => {
   const navigate = useNavigate()
@@ -38,6 +38,18 @@ const FileDetail = () => {
       window.open(url, '_blank')
     } catch (err) {
       alert('Download failed: ' + err.message)
+    }
+  }
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm('Are you sure you want to delete this file?')
+    if (!confirmed) return
+
+    try {
+      await deleteFile(fileData.id, token)
+      navigate('/files')
+    } catch (err) {
+      alert('Delete failed: ' + err.message)
     }
   }
 
@@ -77,7 +89,7 @@ const FileDetail = () => {
             {fileData.created_at ? new Date(fileData.created_at).toLocaleString() : 'Unknown'}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Uploaded by: {fileData.User?.email || 'Unknown'}
+            Uploaded by: {fileData.uploader?.email || 'Unknown'}
           </Typography>
           <Typography
             variant="body2"
@@ -86,9 +98,12 @@ const FileDetail = () => {
           >
             Encryption Status: {fileData.hardwarePinHash ? 'Encrypted' : 'Not Encrypted'}
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
             <Button variant="contained" color="primary" onClick={handleDownload}>
               Download
+            </Button>
+            <Button variant="outlined" color="error" onClick={handleDelete}>
+              Delete
             </Button>
           </Box>
         </CardContent>

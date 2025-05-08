@@ -90,3 +90,14 @@ export async function downloadFile(link, token, fileName) {
   URL.revokeObjectURL(url)
   a.remove()
 }
+
+export async function deleteFile(id, token) {
+  const res = await fetch(`${API}/file/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'authorization-x': token
+    }
+  })
+
+  if (!res.ok) throw new Error('Failed to delete file')
+}
