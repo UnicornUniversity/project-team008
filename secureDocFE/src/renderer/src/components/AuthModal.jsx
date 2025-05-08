@@ -77,6 +77,7 @@ const AuthModal = ({ open, mode, onClose, onSwitchMode }) => {
         <Box
           component="img"
           src={logo}
+          draggable={false}
           alt="SecureDoc"
           sx={{ width: 140, mx: 'auto', mb: -3.5, mt: -3.5 }}
         />

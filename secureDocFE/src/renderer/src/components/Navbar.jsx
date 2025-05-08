@@ -1,7 +1,7 @@
 // src/renderer/src/components/Navbar.js
 import React, { useState } from 'react'
 import { AppBar, Toolbar, Typography, Button, Box, Avatar, Menu, MenuItem } from '@mui/material'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import md5 from 'blueimp-md5'
 import smallLogo from '../assets/small_logo.png'
 import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined'
@@ -9,11 +9,13 @@ import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
 
 import { useStore } from '../store/useStore.js'
 import { appStore } from '../store/appStore.js'
+import { ArrowBackOutlined } from '@mui/icons-material'
 
 export default function Navbar() {
   const user = useStore(appStore, 'user')
   const role = useStore(appStore, 'role')
   const navigate = useNavigate()
+  const { pathname } = useLocation()
 
   const [anchorEl, setAnchorEl] = useState(null)
   const handleMenuOpen = (e) => setAnchorEl(e.currentTarget)
@@ -46,7 +48,18 @@ export default function Navbar() {
       <Toolbar>
         <Box sx={{ display: 'flex', width: '100%' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
-            <Avatar alt="SecureDoc" src={smallLogo} />
+            <Avatar imgProps={{ draggable: false }} alt="SecureDoc" src={smallLogo} />
+            {pathname !== '/files' && (
+              <Button
+                color="inherit"
+                startIcon={<ArrowBackOutlined />}
+                onClick={() => {
+                  navigate('/files')
+                }}
+              >
+                Back to all Files
+              </Button>
+            )}
           </Box>
 
           {user && (
@@ -75,7 +88,7 @@ export default function Navbar() {
                 }}
               >
                 <Typography variant="body2">{user.email}</Typography>
-                <Avatar alt={user.email} src={gravatarUrl} />
+                <Avatar imgProps={{ draggable: false }} alt={user.email} src={gravatarUrl} />
               </Button>
 
               <Menu

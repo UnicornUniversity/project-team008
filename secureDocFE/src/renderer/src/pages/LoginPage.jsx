@@ -26,7 +26,13 @@ const LoginPage = () => {
         bgcolor: 'background.default'
       }}
     >
-      <Box component="img" src={logo} alt="SecureDoc Logo" sx={{ width: 250, mb: 4, mt: -4 }} />
+      <Box
+        draggable={false}
+        component="img"
+        src={logo}
+        alt="SecureDoc Logo"
+        sx={{ width: 250, mb: 4, mt: -4 }}
+      />
 
       <Button
         startIcon={<LockIcon />}

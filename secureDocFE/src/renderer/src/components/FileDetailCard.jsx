@@ -37,6 +37,9 @@ import {
 } from '@mui/icons-material'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import { useRef } from 'react'
+import { useLockOverlay } from '../hooks/useLockOverlay.js'
+import LockOverlay from './LockOverlay.jsx'
 
 const MAX_NAME_LENGTH = 24
 
@@ -54,7 +57,6 @@ export default function FileDetailCard() {
   const theme = useTheme()
 
   const userObj = useStore(appStore, 'userObject')
-  const isOwner = Boolean(userObj?.id && Number(userObj.id) === Number(fileId))
 
   const { getById, updateFile } = useFile()
   const { listForFile, grantAccess } = useFileAccess()
@@ -65,8 +67,17 @@ export default function FileDetailCard() {
   const [allUsers, setAllUsers] = useState([])
   const [selectedUser, setSelectedUser] = useState(null)
 
+  const lock = useLockOverlay()
+
+  const handleHardwareLock = () => {
+    console.log('clicked')
+    lock.startLock(async (enteredPin) => {
+      await api.setHardwarePin(fileId, enteredPin)
+    })
+  }
+
   const owner = useMemo(() => {
-    let ownerUser = allUsers.find((usr) => usr.id === file.owner)
+    let ownerUser = allUsers.find((usr) => usr.id === file?.owner)
     if (!ownerUser) ownerUser = {}
     ownerUser.hash = md5(ownerUser?.email?.trim()?.toLowerCase())
 
@@ -85,6 +96,7 @@ export default function FileDetailCard() {
           >
             <ListItemAvatar>
               <Avatar
+                imgProps={{ draggable: false }}
                 sx={{ mt: 1, width: 50, height: 50 }}
                 src={`https://www.gravatar.com/avatar/${hash}?d=wavatar&s=100`}
               />
@@ -196,6 +208,7 @@ export default function FileDetailCard() {
         >
           <Avatar
             variant="rounded"
+            imgProps={{ draggable: false }}
             sx={{
               width: 80,
               height: 80,
@@ -234,7 +247,12 @@ export default function FileDetailCard() {
                 DOWNLOAD
               </Button>
 
-              <Button startIcon={<LockOutlinedIcon />} color={'warning'} variant="outlined">
+              <Button
+                startIcon={<LockOutlinedIcon />}
+                onClick={handleHardwareLock}
+                color={'warning'}
+                variant="outlined"
+              >
                 {isLocked ? 'CHANGE LOCK' : 'HARDWARE LOCK'}
               </Button>
 
@@ -243,16 +261,6 @@ export default function FileDetailCard() {
               </Button>
             </Box>
           </Box>
-
-          {isOwner && (
-            <Button
-              variant="contained"
-              color={isLocked ? 'secondary' : 'primary'}
-              onClick={handleLock}
-            >
-              {isLocked ? 'Change Lock' : 'Hardware Lock'}
-            </Button>
-          )}
         </CardContent>
       </Card>
 
@@ -294,6 +302,7 @@ export default function FileDetailCard() {
               >
                 <ListItemAvatar>
                   <Avatar
+                    imgProps={{ draggable: false }}
                     sx={{ mt: 1, width: 50, height: 50 }}
                     src={`https://www.gravatar.com/avatar/${owner?.hash}?d=wavatar&s=100`}
                   />
@@ -318,7 +327,10 @@ export default function FileDetailCard() {
                   {...props}
                   sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                 >
-                  <Avatar src={`https://www.gravatar.com/avatar/${hash}?d=wavatar&s=32`} />
+                  <Avatar
+                    draggable={false}
+                    src={`https://www.gravatar.com/avatar/${hash}?d=wavatar&s=32`}
+                  />
                   {option.email}
                 </Box>
               )
@@ -334,6 +346,7 @@ export default function FileDetailCard() {
           </Box>
         </CardContent>
       </Card>
+      <LockOverlay {...lock} />
     </Box>
   )
 }
