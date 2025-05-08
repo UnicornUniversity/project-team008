@@ -1,86 +1,77 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useStore } from '../context/StoreContext'
-import { FiSun, FiMoon } from 'react-icons/fi'
+// src/renderer/src/components/Navbar.js
+import React from 'react'
+import { AppBar, Toolbar, Typography, Button, Box, Avatar } from '@mui/material'
+import { NavLink, useNavigate } from 'react-router-dom'
+import md5 from 'blueimp-md5'
+import smallLogo from '../assets/small_logo.png'
 
-const Navbar = () => {
-  const { user, setUser, role, setRole, theme, setTheme } = useStore()
+import { useStore } from '../store/useStore.js'
+import { appStore } from '../store/appStore.js'
+
+export default function Navbar() {
+  const user = useStore(appStore, 'user')
+  const role = useStore(appStore, 'role')
   const navigate = useNavigate()
 
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light')
-  }
-
   const handleLogout = () => {
-    setUser(null)
-    setRole(null)
+    appStore.setState({
+      user: undefined,
+      role: undefined,
+      token: undefined,
+      userObject: undefined
+    })
     navigate('/')
   }
 
-  useEffect(() => {
-    document.body.className = theme
-  }, [theme])
+  const emailHash = md5(user.email.trim().toLowerCase())
+  const gravatarUrl = `https://www.gravatar.com/avatar/${emailHash}?d=wavatar&s=100`
+
+  console.log('user', user)
+
+  if (!user) return ''
 
   return (
-    <>
-      <nav
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '1rem',
-          backgroundColor: '#eee',
-          borderBottom: '1px solid #ccc'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          {user && (
-            <>
+    <AppBar position="static" color="inherit" variant="flat" elevation={1}>
+      <Toolbar>
+        <Box sx={{ display: 'flex', width: '100%' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
+            <Avatar alt={'SecureDoc'} src={smallLogo} />
+          </Box>
+
+          {user ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               {role === 'admin' && (
-                <button onClick={() => navigate('/admin')}>Administration</button>
+                <Button
+                  component={NavLink}
+                  to="/admin"
+                  color="inherit"
+                  sx={{
+                    '&.active': { fontWeight: 600, textDecoration: 'underline' }
+                  }}
+                >
+                  Admin
+                </Button>
               )}
-              <button onClick={() => navigate('/files')}>File List</button>
-              <button onClick={() => navigate('/files/download')}>Download</button>
-            </>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span
-            onClick={toggleTheme}
-            style={{
-              cursor: 'pointer',
-              fontSize: '1.5rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            title="Toggle theme"
-          >
-            {theme === 'light' ? <FiMoon /> : <FiSun />}
-          </span>
-
-          {user && (
-            <>
-              <span style={{ fontWeight: 'bold' }}>{user}</span>
-              <button
-                onClick={handleLogout}
-                style={{
-                  padding: '0.4rem 0.8rem',
-                  border: '1px solid #aaa',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  backgroundColor: 'white'
-                }}
-              >
+              <Button color="inherit" onClick={handleLogout}>
                 Logout
-              </button>
-            </>
+              </Button>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="body2" color="inherit">
+                  {user?.email}
+                </Typography>
+                <Avatar alt={user.email} src={gravatarUrl} />
+              </Box>
+
+              {/* Logout */}
+            </Box>
+          ) : (
+            <Button color="inherit" onClick={() => navigate('/')}>
+              Login
+            </Button>
           )}
-        </div>
-      </nav>
-    </>
+        </Box>
+      </Toolbar>
+    </AppBar>
   )
 }
-
-export default Navbar

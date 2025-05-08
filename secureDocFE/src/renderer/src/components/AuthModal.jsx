@@ -46,7 +46,7 @@ const AuthModal = ({ open, mode, onClose, onSwitchMode }) => {
         const result = await login({ email, password })
         if (result) {
           appStore.setState({ token: result.token })
-          const user = fetchMe()
+          const user = await fetchMe()
           if (user) {
             appStore.setState({ user })
             navigate('/files')
@@ -58,7 +58,7 @@ const AuthModal = ({ open, mode, onClose, onSwitchMode }) => {
           const result = await login({ email, password })
           if (result) {
             appStore.setState({ token: result.token })
-            const user = fetchMe()
+            const user = await fetchMe()
             if (user) {
               appStore.setState({ user })
               navigate('/files')
