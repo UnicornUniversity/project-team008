@@ -38,7 +38,7 @@ import {
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 
-const MAX_NAME_LENGTH = 30
+const MAX_NAME_LENGTH = 24
 
 function formatBytes(bytes) {
   if (bytes === 0) return '0 B'
