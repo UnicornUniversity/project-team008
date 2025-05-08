@@ -1,6 +1,6 @@
 // src/renderer/src/components/FileDetailCard.jsx
 import React, { useState, useEffect, useMemo } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import md5 from 'blueimp-md5'
 import {
   Box,
@@ -40,6 +40,8 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import { useRef } from 'react'
 import { useLockOverlay } from '../hooks/useLockOverlay.js'
 import LockOverlay from './LockOverlay.jsx'
+import DeleteConfirmDialog from './DeleteConfirmDialog.jsx'
+import { useDownload } from '../hooks/useDownload.js'
 
 const MAX_NAME_LENGTH = 24
 
@@ -58,16 +60,33 @@ export default function FileDetailCard() {
 
   const userObj = useStore(appStore, 'userObject')
 
-  const { getById, updateFile } = useFile()
-  const { listForFile, grantAccess } = useFileAccess()
+  const { getById, deleteFile } = useFile()
+  const { listForFile, grantAccess, revokeAccess, updateAccess } = useFileAccess()
   const { fetchAll: fetchUsers } = useUser()
+  const { download } = useDownload()
 
   const [file, setFile] = useState(null)
   const [accessList, setAccessList] = useState([])
   const [allUsers, setAllUsers] = useState([])
   const [selectedUser, setSelectedUser] = useState(null)
 
+  const navigate = useNavigate()
+
   const lock = useLockOverlay()
+
+  const [dlgOpen, setDlgOpen] = useState(false)
+
+  const handleDeleteClick = () => {
+    setDlgOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (file) {
+      await deleteFile(file.id)
+      navigate('/files')
+    }
+    setDlgOpen(false)
+  }
 
   const handleHardwareLock = () => {
     console.log('clicked')
@@ -83,6 +102,10 @@ export default function FileDetailCard() {
 
     return ownerUser
   }, [file, allUsers])
+
+  const handleDownloadFile = async () => {
+    await download(file || {})
+  }
 
   const accessListOptions = useMemo(
     () =>
@@ -121,10 +144,48 @@ export default function FileDetailCard() {
                       }
                     }}
                   >
-                    <ToggleButton value="read">Read</ToggleButton>
-                    <ToggleButton value="write">Write</ToggleButton>
+                    <ToggleButton
+                      onClick={async () => {
+                        await updateAccess({
+                          userId: entry.userId,
+                          fileId: entry.fileId,
+                          permission: 'read'
+                        })
+                        const newList = await listForFile(fileId)
+                        setAccessList(newList || [])
+                      }}
+                      value="read"
+                    >
+                      Read
+                    </ToggleButton>
+                    <ToggleButton
+                      onClick={async () => {
+                        await updateAccess({
+                          userId: entry.userId,
+                          fileId: entry.fileId,
+                          permission: 'write'
+                        })
+
+                        const newList = await listForFile(fileId)
+                        setAccessList(newList || [])
+                      }}
+                      value="write"
+                    >
+                      Write
+                    </ToggleButton>
                   </ToggleButtonGroup>
-                  <Button color="error" sx={{ ml: 1, height: 26 }}>
+                  <Button
+                    onClick={async () => {
+                      await revokeAccess({
+                        userId: entry.userId,
+                        fileId: entry.fileId
+                      })
+                      const newList = await listForFile(fileId)
+                      setAccessList(newList || [])
+                    }}
+                    color="error"
+                    sx={{ ml: 1, height: 26 }}
+                  >
                     Remove
                   </Button>
                 </>
@@ -243,7 +304,12 @@ export default function FileDetailCard() {
               </Box>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Button startIcon={<DownloadOutlined />} color={'primary'} variant="outlined">
+              <Button
+                onClick={handleDownloadFile}
+                startIcon={<DownloadOutlined />}
+                color={'primary'}
+                variant="outlined"
+              >
                 DOWNLOAD
               </Button>
 
@@ -256,7 +322,7 @@ export default function FileDetailCard() {
                 {isLocked ? 'CHANGE LOCK' : 'HARDWARE LOCK'}
               </Button>
 
-              <Button variant={'outlined'} color={'error'}>
+              <Button onClick={handleDeleteClick} variant={'outlined'} color={'error'}>
                 <DeleteSweepOutlined />
               </Button>
             </Box>
@@ -347,6 +413,12 @@ export default function FileDetailCard() {
         </CardContent>
       </Card>
       <LockOverlay {...lock} />
+      <DeleteConfirmDialog
+        open={dlgOpen}
+        fileName={file?.fileName}
+        onClose={() => setDlgOpen(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </Box>
   )
 }

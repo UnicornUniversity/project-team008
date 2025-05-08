@@ -24,6 +24,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import { useFile } from '../hooks/useFile.js'
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog.jsx'
 import { useNavigate } from 'react-router-dom'
+import { useDownload } from '../hooks/useDownload.js'
 
 export const MAX_NAME_LENGTH = 20
 
@@ -47,6 +48,7 @@ export function fileIconByExtension(name) {
 export default function FileGrid() {
   const theme = useTheme()
   const { listAll, deleteFile } = useFile()
+  const { download } = useDownload()
   const [files, setFiles] = useState([])
   const [dlgOpen, setDlgOpen] = useState(false)
   const [target, setTarget] = useState(null)
@@ -169,7 +171,7 @@ export default function FileGrid() {
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        // placeholder download
+                        download(file)
                       }}
                     >
                       Download

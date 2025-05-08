@@ -40,8 +40,38 @@ export function useFileAccess() {
     return entry
   }
 
+  async function updateAccess({ fileId, userId, permission }) {
+    const [error, entry] = await request(`file/${fileId}/user/${userId}`, { permission }, 'PUT')
+    if (error) {
+      console.error(`Error updating access for ${userId}:`, error)
+      addAlert({ key: `updateAccess:${fileId}:${userId}`, message: error.message })
+      return null
+    }
+    return entry
+  }
+
+  /**
+   * Revoke (delete) an access entry
+   * DELETE /file/:id/user/:userId
+   */
+  async function revokeAccess({ fileId, userId }) {
+    const [error] = await request(`file/${fileId}/user/${userId}`, undefined, 'DELETE')
+    if (error) {
+      console.error(`Error revoking access for user ${userId} on file ${fileId}:`, error)
+      addAlert({
+        key: `revokeAccess:${fileId}:${userId}`,
+        message: error.message,
+        severity: 'error'
+      })
+      return false
+    }
+    return true
+  }
+
   return {
     listForFile,
-    grantAccess
+    grantAccess,
+    updateAccess,
+    revokeAccess
   }
 }

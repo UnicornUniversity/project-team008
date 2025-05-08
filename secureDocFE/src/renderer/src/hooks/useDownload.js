@@ -5,17 +5,17 @@ import { addAlert } from '../utils/addAlert.js'
 export function useDownload() {
   /**
    * Generate a short-lived download token and save the file to the user's PC.
-   * @param {number|string} id – the File ID
+   * @param {File} – the File
    * @param {string} [hardwarePin] – optional PIN for protected files
    * @returns {Promise<boolean>} – true on success, false on error
    */
-  async function download(id, hardwarePin) {
+  async function download(file, hardwarePin) {
     try {
       const token = appStore.getState().token
-      const apiUrl = import.meta.env.VITE_API_URL
+      const apiUrl = import.meta.env.VITE_API_PATH
 
       // 1) Request a download token
-      const genRes = await fetch(`${apiUrl}/download/${id}`, {
+      const genRes = await fetch(`${apiUrl}/download/${file.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -31,7 +31,8 @@ export function useDownload() {
 
       // 2) Fetch the binary
       const fileRes = await fetch(download_url, {
-        method: 'GET'
+        method: 'GET',
+        headers: { 'authorization-x': token || '' }
       })
       if (!fileRes.ok) {
         throw new Error(`Download failed: ${fileRes.statusText}`)
@@ -39,7 +40,7 @@ export function useDownload() {
       const blob = await fileRes.blob()
 
       // 3) Determine filename from headers or fallback
-      let filename = `file-${id}`
+      let filename = file.fileName
       const contentDisp = fileRes.headers.get('Content-Disposition')
       if (contentDisp) {
         const match = contentDisp.match(/filename\*?=(?:UTF-8'')?["']?([^;"']+)["']?/)
@@ -58,10 +59,16 @@ export function useDownload() {
       a.remove()
       URL.revokeObjectURL(url)
 
+      addAlert({
+        key: `downloadFile:${file.id}`,
+        severity: 'success',
+        message: 'Download Success!XS'
+      })
+
       return true
     } catch (err) {
       console.error('Error downloading file:', err)
-      addAlert({ key: `downloadFile:${id}`, message: err.message })
+      addAlert({ key: `downloadFile:${file.id}`, message: err.message })
       return false
     }
   }

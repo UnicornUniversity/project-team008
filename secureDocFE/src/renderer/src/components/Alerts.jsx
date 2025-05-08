@@ -33,8 +33,8 @@ export function Alerts() {
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       sx={{ m: 3 }}
     >
-      <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
-        {message}
+      <Alert onClose={handleClose} severity={message.severity || 'error'} sx={{ width: '100%' }}>
+        {message.message}
       </Alert>
     </Snackbar>
   )
