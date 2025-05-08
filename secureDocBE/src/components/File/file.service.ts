@@ -1,5 +1,5 @@
-// File: src/components/File/file.service.ts
 import { File } from './file.model'
+import { User } from '../User/user.model'
 import path from 'path'
 import fs from 'fs'
 import bcrypt from 'bcrypt'
@@ -11,13 +11,15 @@ dotenv.config()
 
 export class FileService {
   static async listAll() {
-    return File.findAll()
+    return File.findAll({
+      include: [{ model: User, as: 'uploader', attributes: ['id', 'email'] }],
+    })
   }
 
   static async upload(req: Request) {
     if (!req.file) throw new Error('No file uploaded')
 
-    const { filename, size, path: tmpPath } = req.file as any
+    const { originalname, filename, size, path: tmpPath } = req.file as any
     const uploadsDir = path.resolve(__dirname, '../../../uploads')
 
     if (!fs.existsSync(uploadsDir)) {
@@ -27,7 +29,7 @@ export class FileService {
     fs.renameSync(tmpPath, dest)
 
     const file = await File.create({
-      fileName: filename,
+      fileName: originalname,
       localUrl: dest,
       size,
       owner: req.user!.id,
@@ -39,7 +41,9 @@ export class FileService {
   }
 
   static async getById(id: string) {
-    const f = await File.findByPk(id)
+    const f = await File.findByPk(id, {
+      include: [{ model: User, as: 'uploader', attributes: ['id', 'email'] }],
+    })
     if (!f) throw new Error('Not found')
     return f
   }
@@ -82,6 +86,7 @@ export class FileService {
           { id: accessibleIds.length ? accessibleIds : 0 },
         ],
       },
+      include: [{ model: User, as: 'uploader', attributes: ['id', 'email'] }],
     })
   }
 }

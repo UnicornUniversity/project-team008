@@ -1,5 +1,6 @@
 import { DataTypes, Model } from 'sequelize'
 import { sequelize } from '../../config/database'
+import { User } from '../User/user.model'
 
 export class File extends Model {
   declare id: string
@@ -36,3 +37,5 @@ File.init(
     underscored: true,
   }
 )
+
+File.belongsTo(User, { foreignKey: 'owner', as: 'uploader' })

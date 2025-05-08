@@ -34,8 +34,6 @@ const FileListPage = () => {
     fetchFiles()
     console.log('Fetching files...')
   }, [])
-  
-
 
   const handleFileClick = (fileId) => {
     navigate(`/files/detail/${fileId}`)
@@ -62,14 +60,14 @@ const FileListPage = () => {
   const handleDragOver = (e) => e.preventDefault()
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', p: 2 }}>
+    <Box sx={{ maxWidth: 1000, mx: 'auto', p: 3 }}>
       <Typography variant="h4" textAlign="center" gutterBottom>
         Available Files
       </Typography>
 
-      <Stack spacing={2} mt={4}>
+      <Stack spacing={3} mt={4}>
         {files.map((file) => (
-          <Card key={file.id}>
+          <Card key={file.id} sx={{ boxShadow: 3 }}>
             <CardContent
               sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
             >
@@ -77,9 +75,10 @@ const FileListPage = () => {
                 <Typography variant="h6">{file.fileName}</Typography>
                 <Typography variant="body2" color="text.secondary">
                   Uploaded:{' '}
-                  {file.createdAt
-                    ? new Date(file.createdAt).toISOString().split('T')[0]
-                    : 'Unknown'}
+                  {file.created_at ? new Date(file.created_at).toLocaleString() : 'Unknown'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Uploaded by: {file.uploader?.email || 'Unknown'}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -104,14 +103,16 @@ const FileListPage = () => {
           sx={{
             border: '2px dashed gray',
             textAlign: 'center',
-            py: 4,
-            backgroundColor: '#f9f9f9',
-            cursor: 'pointer'
+            py: 5,
+            backgroundColor: '#f0f0f0',
+            cursor: 'pointer',
+            boxShadow: 2,
+            borderRadius: 2
           }}
         >
           <CardContent>
-            <CloudUpload sx={{ fontSize: 40, color: 'gray' }} />
-            <Typography variant="body1">Drag & Drop to Upload</Typography>
+            <CloudUpload sx={{ fontSize: 50, color: 'gray' }} />
+            <Typography variant="body1">Drag & Drop a File Here to Upload</Typography>
           </CardContent>
         </Card>
       </Stack>
