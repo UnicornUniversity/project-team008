@@ -1,5 +1,6 @@
 // src/renderer/src/hooks/useFile.js
 import { request } from '../api/request.js'
+import { appStore } from '../store/appStore.js'
 import { addAlert } from '../utils/addAlert.js'
 
 export function useFile() {
@@ -35,18 +36,20 @@ export function useFile() {
    * Upload a new file
    * POST /file  (multipart/form-data)
    */
-  async function upload(fileBlob) {
+  async function upload(fileBlob, token) {
+    token = token ?? appStore.getState().token
+
     const form = new FormData()
     form.append('file', fileBlob)
-
+    const options = {
+      method: 'POST',
+      headers: {
+        'authorization-x': token || ''
+      },
+      body: form
+    }
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/file`, {
-        method: 'POST',
-        headers: {
-          'x-authenticate': (await request).token || ''
-        },
-        body: form
-      })
+      const res = await fetch(`${import.meta.env.VITE_API_PATH}/file`, options)
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}))
         throw new Error(errData.message || 'Upload failed')
@@ -79,6 +82,7 @@ export function useFile() {
    */
   async function deleteFile(id) {
     const [error] = await request(`file/${id}`, undefined, 'DELETE')
+    console.log('error', error)
     if (error) {
       console.error(`Error deleting file ${id}:`, error)
       addAlert({ key: `deleteFile:${id}`, message: error.message })

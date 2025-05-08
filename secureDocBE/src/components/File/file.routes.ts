@@ -5,8 +5,12 @@ import { FileService } from './file.service'
 const upload = multer({ dest: 'tmp/' })
 const router = Router()
 
-router.get('/', async (_req, res) => {
-  const files = await FileService.listAll()
+router.get('/', async (_req: any, res) => {
+  if (!_req.user) {
+    res.status(400).json({ message: 'No user defined.' })
+    return
+  }
+  const files = await FileService.listForUser(Number(_req.user?.id))
   res.json(files)
 })
 

@@ -30,6 +30,12 @@ export async function request(path, data, method = 'POST', token = appStore.getS
       }
     }
 
+    console.log('response', response)
+
+    if (response.status === 204) {
+      return [null, true]
+    }
+
     const result = await response.json()
     return [null, result]
   } catch (err) {

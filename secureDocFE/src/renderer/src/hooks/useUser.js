@@ -8,7 +8,7 @@ export function useUser() {
    * GET /users
    */
   async function fetchAll() {
-    const [error, users] = await request('users', undefined, 'GET')
+    const [error, users] = await request('user', undefined, 'GET')
     if (error) {
       console.error('Error fetching users:', error)
       addAlert({ key: 'fetchUsers', message: error.message })

@@ -10,8 +10,6 @@ router.get('/', async (_req, res) => {
 })
 
 router.get('/me', async (req: any, res) => {
-  console.log('This is legit mate tough')
-  console.log('user', req.user)
   if (req.user) {
     try {
       const loggedUser = await User.findOne({

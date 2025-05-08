@@ -27,5 +27,6 @@ FileAccess.init(
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: false,
+    underscored: true,
   }
 )

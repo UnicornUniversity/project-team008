@@ -13,8 +13,8 @@ server.listen(8123, "127.0.0.1");
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 240,
-    height: 320,
+    width: 260,
+    height: 360,
     resizable: false,
     webPreferences: { preload: path.join(__dirname, "preload.js") },
   });

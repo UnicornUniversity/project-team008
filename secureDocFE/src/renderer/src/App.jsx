@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material'
 import { blue, indigo, grey } from '@mui/material/colors'
 import Navbar from './components/Navbar'
@@ -11,15 +11,28 @@ import { Alerts } from './components/Alerts'
 import { useStore } from './store/useStore'
 import { appStore } from './store/appStore'
 import { StoreProvider } from './context/StoreContext'
+import { useFile } from './hooks/useFile'
+import FileDropOverlay from './components/FileDropOverlay'
 
 function App() {
   const user = useStore(appStore, 'user')
   const { pathname } = useLocation()
+  const navigate = useNavigate()
 
   const showNavbar = pathname !== '/'
 
+  const { upload, listAll } = useFile()
+
+  const handleFiles = (fileList) => {
+    user &&
+      upload(fileList[0]).then((result) => {
+        navigate('/files/detail/' + result?.id)
+      })
+  }
+
   return (
     <>
+      {user && <FileDropOverlay onFiles={handleFiles} />}
       {showNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<LoginPage />} />

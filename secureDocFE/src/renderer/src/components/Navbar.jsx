@@ -36,7 +36,13 @@ export default function Navbar() {
   const gravatarUrl = `https://www.gravatar.com/avatar/${emailHash}?d=wavatar&s=100`
 
   return (
-    <AppBar position="static" color="inherit" variant="flat" elevation={1}>
+    <AppBar
+      position="static"
+      color="inherit"
+      sx={{ borderBottom: '4px solid rgba(201, 201, 201, 0.3)' }}
+      variant="flat"
+      elevation={1}
+    >
       <Toolbar>
         <Box sx={{ display: 'flex', width: '100%' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
