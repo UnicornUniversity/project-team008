@@ -15,6 +15,7 @@ export default function LockOverlay({ open, cancel, handlePin }) {
       console.log('masked', masked)
       setMasked((prev) => '•'.repeat(prev.length + 1))
     }
+
     if (event?.event === 'pin') {
       console.log('pin event!')
       handlePin({ arduinoId: event?.arduinoId, pin: event?.value })

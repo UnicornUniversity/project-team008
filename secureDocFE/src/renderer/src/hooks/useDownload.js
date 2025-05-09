@@ -5,23 +5,24 @@ import { addAlert } from '../utils/addAlert.js'
 export function useDownload() {
   /**
    * Generate a short-lived download token and save the file to the user's PC.
-   * @param {File} – the File
+   * @param {File} file – the File meta object
    * @param {string} [hardwarePin] – optional PIN for protected files
+   * @param {number} [arduinoId] – optional Arduino device ID
    * @returns {Promise<boolean>} – true on success, false on error
    */
-  async function download(file, hardwarePin) {
+  async function download(file, hardwarePin, arduinoId) {
     try {
       const token = appStore.getState().token
       const apiUrl = import.meta.env.VITE_API_PATH
 
-      // 1) Request a download token
+      // 1) Request a download token+URL
       const genRes = await fetch(`${apiUrl}/download/${file.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'authorization-x': token || '',
-          'hardware-pin': hardwarePin || ''
-        }
+          'authorization-x': token || ''
+        },
+        body: JSON.stringify({ hardwarePin, arduinoId })
       })
       if (!genRes.ok) {
         const errBody = await genRes.json().catch(() => ({}))
@@ -29,7 +30,7 @@ export function useDownload() {
       }
       const { download_url } = await genRes.json()
 
-      // 2) Fetch the binary
+      // 2) Fetch the binary (pass your main auth token again)
       const fileRes = await fetch(download_url, {
         method: 'GET',
         headers: { 'authorization-x': token || '' }
@@ -59,16 +60,20 @@ export function useDownload() {
       a.remove()
       URL.revokeObjectURL(url)
 
+      // success alert
       addAlert({
         key: `downloadFile:${file.id}`,
         severity: 'success',
-        message: 'Download Success!XS'
+        message: 'Download successful!'
       })
-
       return true
     } catch (err) {
       console.error('Error downloading file:', err)
-      addAlert({ key: `downloadFile:${file.id}`, message: err.message })
+      addAlert({
+        key: `downloadFile:${file.id}`,
+        severity: 'error',
+        message: err.message
+      })
       return false
     }
   }

@@ -1,5 +1,5 @@
 // src/renderer/src/components/FileDetailCard.jsx
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import md5 from 'blueimp-md5'
 import {
@@ -14,10 +14,8 @@ import {
   ListItemText,
   Autocomplete,
   TextField,
-  Divider,
   useTheme,
-  Tooltip,
-  IconButton
+  Tooltip
 } from '@mui/material'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined'
@@ -28,21 +26,13 @@ import { useFile } from '../hooks/useFile.js'
 import { useFileAccess } from '../hooks/useFileAccess.js'
 import { useUser } from '../hooks/useUser.js'
 import { fileIconByExtension } from '../pages/FileListPage.jsx'
-import {
-  DeleteForeverOutlined,
-  DeleteSweep,
-  DeleteSweepOutlined,
-  DeleteSweepRounded,
-  DownloadOutlined
-} from '@mui/icons-material'
+import { DeleteSweepOutlined, DownloadOutlined } from '@mui/icons-material'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
-import { useRef } from 'react'
 import { useLockOverlay } from '../hooks/useLockOverlay.js'
 import LockOverlay from './LockOverlay.jsx'
 import DeleteConfirmDialog from './DeleteConfirmDialog.jsx'
 import { useDownload } from '../hooks/useDownload.js'
-import { addAlert } from '../utils/addAlert.js'
 
 const MAX_NAME_LENGTH = 24
 
@@ -59,7 +49,7 @@ export default function FileDetailCard() {
   const fileId = id
   const theme = useTheme()
 
-  const userObj = useStore(appStore, 'userObject')
+  const user = useStore(appStore, 'user')
 
   const { getById, deleteFile, lockToArduino } = useFile()
   const { listForFile, grantAccess, revokeAccess, updateAccess } = useFileAccess()
@@ -70,6 +60,7 @@ export default function FileDetailCard() {
   const [accessList, setAccessList] = useState([])
   const [allUsers, setAllUsers] = useState([])
   const [selectedUser, setSelectedUser] = useState(null)
+  const [isDownloading, setIsDownloading] = useState(false)
 
   const navigate = useNavigate()
 
@@ -96,9 +87,13 @@ export default function FileDetailCard() {
 
   const handleLockFile = async ({ arduinoId, pin }) => {
     console.log('{ arduinoId, pin }', { arduinoId, pin })
-    await lockToArduino({ fileId, arduinoId, pinHash: pin })
-    const f = await getById(fileId)
-    setFile(f)
+    if (isDownloading) {
+      await download(file, pin, arduinoId)
+    } else {
+      await lockToArduino({ fileId, arduinoId, pinHash: pin })
+      const f = await getById(fileId)
+      setFile(f)
+    }
   }
 
   const owner = useMemo(() => {
@@ -109,8 +104,13 @@ export default function FileDetailCard() {
     return ownerUser
   }, [file, allUsers])
 
+  const isOwner = user.id === owner.id
+
   const handleDownloadFile = async () => {
-    await download(file || {})
+    if (isLocked) {
+      lock.startLock()
+      setIsDownloading(true)
+    }
   }
 
   const accessListOptions = useMemo(
@@ -145,7 +145,6 @@ export default function FileDetailCard() {
                     exclusive
                     onChange={(_, newPerm) => {
                       if (newPerm) {
-                        // call your update-permission handler:
                         handlePermissionToggle(entry.id, newPerm)
                       }
                     }}
@@ -228,18 +227,6 @@ export default function FileDetailCard() {
 
   const isLocked = Boolean(file.hardwarePinHash)
 
-  const handleLock = async () => {
-    // TODO: show PIN prompt modal, then call your Pin‐setting API
-    // stub:
-    const pin = prompt(
-      isLocked ? 'Enter new hardware PIN to change lock:' : 'Enter hardware PIN to lock this file:'
-    )
-    if (!pin) return
-    // call your backend, e.g.:
-    // await yourHook.setHardwarePin(fileId, pin)
-    alert('🔒 PIN set (stub): ' + pin)
-  }
-
   const handleGrant = async () => {
     if (!selectedUser) return
     await grantAccess(fileId, selectedUser.id, 'read')
@@ -248,7 +235,9 @@ export default function FileDetailCard() {
     setSelectedUser(null)
   }
 
-  const toGrant = allUsers.filter((u) => !accessList.some((a) => a.userId === u.id))
+  const toGrant = allUsers.filter(
+    (u) => u.id !== file.owner && !accessList.some((a) => a.userId === u.id)
+  )
   const displayName =
     file.fileName.length > MAX_NAME_LENGTH
       ? `${file.fileName.slice(0, MAX_NAME_LENGTH)}…`
@@ -319,14 +308,16 @@ export default function FileDetailCard() {
                 DOWNLOAD
               </Button>
 
-              <Button
-                startIcon={<LockOutlinedIcon />}
-                onClick={handleHardwareLock}
-                color={'warning'}
-                variant="outlined"
-              >
-                {isLocked ? 'CHANGE LOCK' : 'HARDWARE LOCK'}
-              </Button>
+              {isOwner && (
+                <Button
+                  startIcon={<LockOutlinedIcon />}
+                  onClick={handleHardwareLock}
+                  color={'warning'}
+                  variant="outlined"
+                >
+                  {isLocked ? 'CHANGE LOCK' : 'HARDWARE LOCK'}
+                </Button>
+              )}
 
               <Button onClick={handleDeleteClick} variant={'outlined'} color={'error'}>
                 <DeleteSweepOutlined />

@@ -1,12 +1,49 @@
+// main.js (Arduino MOCK)
 const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 const path = require("path");
 const net = require("net");
 
-let client;
+// your same secret key as on Arduino
+const XOR_KEY = "mock_arduino";
+const ARDUINO_ID = "2";
+
+let clientSock;
+let inputBuffer = "";
+
+// simple XOR + Base64 helper
+function xorEncryptBase64(message, key) {
+  const msgBuf = Buffer.from(message, "utf8");
+  const keyBuf = Buffer.from(key, "utf8");
+  const out = Buffer.alloc(msgBuf.length);
+
+  for (let i = 0; i < msgBuf.length; i++) {
+    out[i] = msgBuf[i] ^ keyBuf[i % keyBuf.length];
+  }
+  return out.toString("base64");
+}
+
+// create a TCP server to simulate the Serial port
 const server = net.createServer((sock) => {
-  client = sock;
-  client.on("close", () => {
-    client = undefined;
+  clientSock = sock;
+  sock.setEncoding("utf8");
+
+  sock.on("data", (chunk) => {
+    // handle potentially multiple lines in one chunk
+    for (let line of chunk.split("\n")) {
+      line = line.trim();
+      if (!line) continue;
+
+      if (line === "START") {
+        // emulate your Arduino START handler
+        clientSock.write(`{"event":"start_equal"}\n`);
+        inputBuffer = "";
+      }
+    }
+  });
+
+  sock.on("close", () => {
+    clientSock = undefined;
+    inputBuffer = "";
   });
 });
 server.listen(8123, "127.0.0.1");
@@ -27,7 +64,20 @@ function createWindow() {
 }
 
 ipcMain.on("key", (_, k) => {
-  if (client && !client.destroyed) client.write(`${k}\n`);
+  // k should be a single character, e.g. "1", "2", "*", "#", or "START"
+  if (clientSock && !clientSock.destroyed) {
+    if (k === "#") {
+      // PIN complete
+      const enc = xorEncryptBase64(inputBuffer, XOR_KEY);
+      clientSock.write(
+        `{"event":"pin","value":"${enc}","arduinoId":"${ARDUINO_ID}"}\n`
+      );
+      inputBuffer = "";
+    } else {
+      clientSock.write(`{"event":"key","value":"*"}\n`);
+      inputBuffer += k;
+    }
+  }
 });
 
 app.whenReady().then(createWindow);

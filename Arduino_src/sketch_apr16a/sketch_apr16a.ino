@@ -3,7 +3,7 @@
 #include <Base64.h>
 
 const String ArduinoId = "1";
-const String key = "-,qwSADF'asf,vre-.dwqe.fgvbxyc__sdad78";
+const String key = "___.q§weqwdqwrefasgdgbfgjngfqweqw.-ssad....!e";
 char encrypted[50];
 char decrypted[50];
 

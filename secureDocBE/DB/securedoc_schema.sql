@@ -16,8 +16,8 @@ CREATE TABLE users (
 
 -- 5. Arduino configurations table
 CREATE TABLE arduino_configs (
-  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  console_hash VARCHAR(255) NOT NULL,
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, -- arduinoId
+  console_hash VARCHAR(255) NOT NULL, -- key in arduino ( secret key )
   enabled TINYINT(1) NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -71,4 +71,6 @@ INSERT INTO file_accesses (id, file_id, user_id, permission, created_at) VALUES
 
 -- Arduino Configurations
 INSERT INTO arduino_configs (id, console_hash, enabled, created_at, updated_at) VALUES
-  (1, 'hardcoded_console_hash_example', 1, '2025-04-20 10:00:00', '2025-04-20 10:00:00');
+  (1, '___.q§weqwdqwrefasgdgbfgjngfqweqw.-ssad....!e', 1, '2025-04-20 10:00:00', '2025-04-20 10:00:00');
+INSERT INTO arduino_configs (id, console_hash, enabled, created_at, updated_at) VALUES
+  (2, 'mock_arduino', 1, '2025-04-20 10:00:00', '2025-04-20 10:00:00');
