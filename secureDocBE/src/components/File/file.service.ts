@@ -89,4 +89,34 @@ export class FileService {
       include: [{ model: User, as: 'uploader', attributes: ['id', 'email'] }],
     })
   }
+
+  static async lockToArduino(
+    fileId: string,
+    arduinoId: string,
+    userId: string,
+    pinHash: string
+  ) {
+    const file = await File.findByPk(fileId)
+    if (!file) {
+      const err = new Error('File not found')
+      ;(err as any).status = 404
+      throw err
+    }
+    if (file.owner !== userId) {
+      const err = new Error('You do not own this file')
+      ;(err as any).status = 403
+      throw err
+    }
+    if (!pinHash) {
+      const err = new Error('Missing pinHash')
+      ;(err as any).status = 400
+      throw err
+    }
+
+    file.hardwarePinHash = pinHash
+    file.arduinoConfigId = Number(arduinoId)
+    await file.save()
+
+    return file
+  }
 }

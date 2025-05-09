@@ -1,19 +1,43 @@
-import React from 'react'
-import { Box, Paper, Typography, Grid, Button, Avatar, useTheme } from '@mui/material'
+import { useEffect, useState } from 'react'
+import { Box, Paper, Typography, useTheme } from '@mui/material'
 import { alpha } from '@mui/material/styles'
 import logo from '../assets/logo.png'
-import { Image } from '@mui/icons-material'
+import { useSerialListener } from '../hooks/useSerialListener'
 
-export default function LockOverlay({ open, pin, addDigit, pressHash, cancel }) {
+export default function LockOverlay({ open, cancel, handlePin }) {
   const theme = useTheme()
+  const [masked, setMasked] = useState('')
+
+  const { startListening } = useSerialListener()
+
+  const handleArduinoEvent = (event) => {
+    if (event?.event === 'key') {
+      console.log('masked', masked)
+      setMasked((prev) => '•'.repeat(prev.length + 1))
+    }
+    if (event?.event === 'pin') {
+      console.log('pin event!')
+      handlePin({ arduinoId: event?.arduinoId, pin: event?.value })
+      cancel()
+    }
+  }
+
+  useEffect(() => {
+    const stop = startListening(handleArduinoEvent)
+    setMasked('')
+    return () => {
+      stop && stop()
+      setMasked('')
+    }
+  }, [open, startListening])
 
   if (!open) return null
 
-  const masked = '•'.repeat(pin.length)
-
   return (
     <Box
-      onClick={cancel}
+      onClick={() => {
+        cancel()
+      }}
       sx={{
         position: 'fixed',
         inset: 0,

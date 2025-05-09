@@ -2,12 +2,12 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 const api = {
-  onLine: cb => {
-    const w = (_, l) => cb(l)
-    ipcRenderer.on('arduino-line', w)
-    return () => ipcRenderer.removeListener('arduino-line', w)
+  onLine: (callback) => {
+    const listener = (_, line) => callback(line)
+    ipcRenderer.on('arduino-line', listener)
+    return () => ipcRenderer.removeListener('arduino-line', listener)
   },
-  write: txt => ipcRenderer.send('arduino-write', txt)
+  write: (text) => ipcRenderer.send('arduino-write', text)
 }
 
 if (process.contextIsolated) {

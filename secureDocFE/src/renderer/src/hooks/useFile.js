@@ -91,11 +91,40 @@ export function useFile() {
     return true
   }
 
+  /**
+   * Lock a file to an Arduino using a pre-hashed PIN.
+   *
+   * @param {string|number} fileId
+   * @param {string|number} arduinoId
+   * @param {string} pinHash   // hash computed on the FE
+   * @returns {Promise<Object|null>} updated file record, or null on error
+   */
+  async function lockToArduino({ fileId, arduinoId, pinHash }) {
+    const path = `file/lock/${fileId}/${arduinoId}`
+    const [error, updated] = await request(path, { pinHash }, 'POST')
+    if (error) {
+      console.error(`Error locking file ${fileId} to Arduino ${arduinoId}:`, error)
+      addAlert({
+        key: `lockFile:${fileId}`,
+        message: error.message,
+        severity: 'error'
+      })
+      return null
+    }
+    addAlert({
+      key: `lockFile:${fileId}`,
+      message: 'File hardware lock updated successfully.',
+      severity: 'success'
+    })
+    return updated
+  }
+
   return {
     listAll,
     getById,
     upload,
     updateFile,
-    deleteFile
+    deleteFile,
+    lockToArduino
   }
 }

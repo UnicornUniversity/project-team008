@@ -50,4 +50,26 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
+router.post('/lock/:fileId/:arduinoId', async (req: any, res: Response) => {
+  const userId = req.user?.id
+  const { fileId, arduinoId } = req.params
+  const { pinHash } = req.body
+
+  if (!userId) {
+    return res.status(401).json({ message: 'Unauthorized' })
+  }
+
+  try {
+    const updated = await FileService.lockToArduino(
+      fileId,
+      arduinoId,
+      userId,
+      pinHash
+    )
+    res.json(updated)
+  } catch (err: any) {
+    res.status(err.status || 400).json({ message: err.message })
+  }
+})
+
 export default router

@@ -14,7 +14,15 @@ CREATE TABLE users (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 3. Files table (adjusted created_by to allow NULL for ON DELETE SET NULL)
+-- 5. Arduino configurations table
+CREATE TABLE arduino_configs (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  console_hash VARCHAR(255) NOT NULL,
+  enabled TINYINT(1) NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 CREATE TABLE files (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   file_name VARCHAR(512) NOT NULL,
@@ -23,10 +31,13 @@ CREATE TABLE files (
   owner INT NOT NULL,
   hardware_pin_hash VARCHAR(255),
   created_by INT NULL,
+  arduino_config_id INT NULL,  -- optional reference to arduino_configs
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (owner) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (arduino_config_id) REFERENCES arduino_configs(id) ON DELETE SET NULL
 );
+
 
 -- 4. File access permissions table
 CREATE TABLE file_accesses (
@@ -37,15 +48,6 @@ CREATE TABLE file_accesses (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- 5. Arduino configurations table
-CREATE TABLE arduino_configs (
-  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  console_hash VARCHAR(255) NOT NULL,
-  enabled TINYINT(1) NOT NULL DEFAULT 0,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- ======================

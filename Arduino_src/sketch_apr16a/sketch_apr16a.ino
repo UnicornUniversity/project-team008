@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <Base64.h>
 
+const String ArduinoId = "1";
 const String key = "-,qwSADF'asf,vre-.dwqe.fgvbxyc__sdad78";
 char encrypted[50];
 char decrypted[50];
@@ -54,6 +55,8 @@ void keypadEvent(KeypadEvent k) {
       // PIN complete – emit as JSON and reset buffer
       Serial.print("{\"event\":\"pin\",\"value\":\"");
       Serial.print(xor_encrypt_base64(inputBuffer, key));
+      Serial.print("\",\"arduinoId\":\"");
+      Serial.print(ArduinoId);
       Serial.println("\"}");
       inputBuffer = "";
     }

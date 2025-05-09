@@ -1,6 +1,7 @@
 import { DataTypes, Model } from 'sequelize'
 import { sequelize } from '../../config/database'
 import { User } from '../User/user.model'
+import { ArduinoConfig } from '../ArduinoConfig/arduino.model'
 
 export class File extends Model {
   declare id: string
@@ -11,6 +12,7 @@ export class File extends Model {
   declare hardwarePinHash: string | null
   declare createdBy: string
   declare createdAt: Date
+  declare arduinoConfigId: number | null
 }
 
 File.init(
@@ -27,6 +29,14 @@ File.init(
     owner: { type: DataTypes.UUID, allowNull: false },
     hardwarePinHash: { type: DataTypes.STRING, allowNull: true },
     createdBy: { type: DataTypes.UUID, allowNull: false },
+    arduinoConfigId: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: true,
+      references: {
+        model: 'arduino_configs',
+        key: 'id',
+      },
+    },
   },
   {
     sequelize,
@@ -38,4 +48,9 @@ File.init(
   }
 )
 
+// Associations
 File.belongsTo(User, { foreignKey: 'owner', as: 'uploader' })
+File.belongsTo(ArduinoConfig, {
+  foreignKey: 'arduinoConfigId',
+  as: 'arduinoConfig',
+})

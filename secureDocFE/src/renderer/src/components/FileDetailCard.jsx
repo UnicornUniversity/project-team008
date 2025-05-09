@@ -42,6 +42,7 @@ import { useLockOverlay } from '../hooks/useLockOverlay.js'
 import LockOverlay from './LockOverlay.jsx'
 import DeleteConfirmDialog from './DeleteConfirmDialog.jsx'
 import { useDownload } from '../hooks/useDownload.js'
+import { addAlert } from '../utils/addAlert.js'
 
 const MAX_NAME_LENGTH = 24
 
@@ -60,7 +61,7 @@ export default function FileDetailCard() {
 
   const userObj = useStore(appStore, 'userObject')
 
-  const { getById, deleteFile } = useFile()
+  const { getById, deleteFile, lockToArduino } = useFile()
   const { listForFile, grantAccess, revokeAccess, updateAccess } = useFileAccess()
   const { fetchAll: fetchUsers } = useUser()
   const { download } = useDownload()
@@ -90,9 +91,14 @@ export default function FileDetailCard() {
 
   const handleHardwareLock = () => {
     console.log('clicked')
-    lock.startLock(async (enteredPin) => {
-      await api.setHardwarePin(fileId, enteredPin)
-    })
+    lock.startLock()
+  }
+
+  const handleLockFile = async ({ arduinoId, pin }) => {
+    console.log('{ arduinoId, pin }', { arduinoId, pin })
+    await lockToArduino({ fileId, arduinoId, pinHash: pin })
+    const f = await getById(fileId)
+    setFile(f)
   }
 
   const owner = useMemo(() => {
@@ -412,7 +418,7 @@ export default function FileDetailCard() {
           </Box>
         </CardContent>
       </Card>
-      <LockOverlay {...lock} />
+      <LockOverlay {...lock} handlePin={handleLockFile} />
       <DeleteConfirmDialog
         open={dlgOpen}
         fileName={file?.fileName}
