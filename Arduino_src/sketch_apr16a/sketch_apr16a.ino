@@ -1,4 +1,30 @@
 #include <Keypad.h>
+#include <Arduino.h>
+#include <Base64.h>
+
+const String key = "-,qwSADF'asf,vre-.dwqe.fgvbxyc__sdad78";
+char encrypted[50];
+char decrypted[50];
+
+String xor_encrypt_base64(String message, const char* key) {
+  int len = message.length();
+  int key_len = strlen(key);
+
+  char encrypted[len];
+
+  // XOR encryption
+  for (int i = 0; i < len; ++i) {
+    encrypted[i] = message[i] ^ key[i % key_len];
+  }
+
+  // Base64 encoding
+  int encodedLength = Base64.encodedLength(len);
+  char encoded[encodedLength + 1];  // +1 for null terminator
+  Base64.encode(encoded, encrypted, len);
+  encoded[encodedLength] = '\0';
+
+  return String(encoded);
+}
 
 const byte ROWS = 4, COLS = 3;
 char keys[ROWS][COLS] = {
@@ -21,13 +47,13 @@ void keypadEvent(KeypadEvent k) {
 
     // DEBUG message as JSON
     Serial.print("{\"event\":\"key\",\"value\":\"");
-    Serial.print(key);
+    Serial.print("*");
     Serial.println("\"}");
 
     if (key == '#') {
       // PIN complete – emit as JSON and reset buffer
       Serial.print("{\"event\":\"pin\",\"value\":\"");
-      Serial.print(inputBuffer);
+      Serial.print(xor_encrypt_base64(inputBuffer, key));
       Serial.println("\"}");
       inputBuffer = "";
     }
