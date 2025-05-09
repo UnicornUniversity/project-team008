@@ -110,6 +110,8 @@ export default function FileDetailCard() {
     if (isLocked) {
       lock.startLock()
       setIsDownloading(true)
+    } else {
+      await download(file)
     }
   }
 

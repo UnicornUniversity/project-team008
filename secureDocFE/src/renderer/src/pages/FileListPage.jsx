@@ -162,20 +162,26 @@ export default function FileGrid() {
                       position: 'relative' // make this box the positioning context
                     }}
                   >
-                    {/* Delete button in top-right corner */}
+                    {!isSecured && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<DownloadOutlinedIcon />}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          download(file)
+                        }}
+                      >
+                        Download
+                      </Button>
+                    )}
 
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      startIcon={<DownloadOutlinedIcon />}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        download(file)
-                      }}
-                    >
-                      Download
-                    </Button>
+                    {isSecured && (
+                      <Button size="small" variant="outlined" color="warning">
+                        LOCKED
+                      </Button>
+                    )}
 
                     <Typography variant="caption" color="text.secondary">
                       {formatBytes(file.size)}

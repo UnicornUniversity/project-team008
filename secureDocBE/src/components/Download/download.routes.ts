@@ -31,7 +31,7 @@ router.post('/:id', async (req: any, res: Response) => {
   }
 })
 
-router.get('/:id/file', async (req: Request, res: Response) => {
+router.get('/:id/file', async (req: any, res: Response) => {
   try {
     const filePath = await DownloadService.verifyTokenAndGetPath(
       +req.params.id,
