@@ -1,9 +1,10 @@
 #include <Keypad.h>
 #include <Arduino.h>
 #include <Base64.h>
+#include "secrets.h"
 
-const String ArduinoId = "1";
-const String key = "___.q§weqwdqwrefasgdgbfgjngfqweqw.-ssad....!e";
+const String ArduinoId = ARDUINO_ID; // defined before build in secrets.h file
+const String key = SECRET_KEY; // defined before build in secrets.h file
 char encrypted[50];
 char decrypted[50];
 
