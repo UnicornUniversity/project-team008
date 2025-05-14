@@ -13,6 +13,7 @@ import { appStore } from './store/appStore'
 import { StoreProvider } from './context/StoreContext'
 import { useFile } from './hooks/useFile'
 import FileDropOverlay from './components/FileDropOverlay'
+import ArduinoConnectionSnackbar from './components/ArduinoConnectionSnackbar'
 
 function App() {
   const user = useStore(appStore, 'user')
@@ -113,6 +114,7 @@ export default function Root() {
         <HashRouter>
           <App />
           <Alerts />
+          <ArduinoConnectionSnackbar />
         </HashRouter>
       </StoreProvider>
     </ThemeProvider>

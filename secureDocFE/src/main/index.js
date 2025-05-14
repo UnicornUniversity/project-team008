@@ -19,14 +19,13 @@ const MAX_RETRIES = 50
 let retries = 0
 let reconnectTimer
 
-console.log('MOCK_ARDUINO', import.meta.env.VITE_MOCK_ARDUINO)
-
 function connectMock() {
   mockSocket = net.connect(8123, '127.0.0.1')
 
   mockSocket.once('connect', () => {
     console.log('+ Mock Arduino connected')
     retries = 0
+    BrowserWindow.getAllWindows().forEach((w) => w.webContents.send('arduino-connected'))
   })
 
   mockSocket.on('data', (b) => {
@@ -69,6 +68,7 @@ function connectRealSerial() {
 
   serialPort.on('open', () => {
     console.log(`🟢 Serial port opened on ${portPath}`)
+    BrowserWindow.getAllWindows().forEach((w) => w.webContents.send('arduino-connected'))
   })
 
   parser.on('data', (line) => {
