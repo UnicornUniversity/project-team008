@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SecureDoc – LOCKPAD</title>
+    <style>
+      :root {
+        --primary: #ff7c00; /* vibrant orange */
+        --surface: #ffffff;
+        --shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        --radius: 16px;
+        --font: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: var(--font);
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary);
+      }
+
+      /* orange overlay tint (like screenshot) */
+      #overlay {
+        position: fixed;
+        inset: 0;
+        background: var(--primary);
+        opacity: 0.9;
+        z-index: -1;
+      }
+
+      .card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        width: 92%;
+        max-width: 420px;
+        padding: 3rem 2rem 2.5rem;
+        text-align: center;
+        box-shadow: var(--shadow);
+      }
+
+      .logo {
+        width: 210px;
+        height: auto;
+        margin-bottom: -27px;
+        margin-top: -40px;
+      }
+
+      h1 {
+        margin: 0;
+        color: #003964;
+        font-size: 2rem;
+        font-weight: 600;
+      }
+
+      .subtitle {
+        margin-top: 1rem;
+        font-size: 1.15rem;
+        color: #555;
+      }
+
+      .lockpad {
+        margin-top: 0.25rem;
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--primary);
+      }
+
+      .instructions {
+        margin-top: 0.75rem;
+        font-size: 0.9rem;
+        color: #666;
+      }
+
+      /* “Material‑ish” buttons */
+      .btn {
+        display: inline-block;
+        margin: 1rem 0.5rem 0;
+        padding: 0.8rem 1.6rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        border-radius: 8px;
+        background: #fff;
+        color: var(--primary);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+      }
+
+      .btn.primary {
+        background: var(--primary);
+        color: #fff;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      /* ripple effect */
+      .btn span.ripple {
+        position: absolute;
+        border-radius: 50%;
+        transform: scale(0);
+        animation: ripple 600ms linear;
+        background: rgba(255, 255, 255, 0.7);
+        pointer-events: none;
+      }
+
+      @keyframes ripple {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+
+      .notice {
+        margin-top: 2rem;
+        font-size: 0.9rem;
+        color: #222;
+      }
+
+      @media (max-width: 480px) {
+        .card {
+          padding: 2rem 1.25rem 2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="overlay"></div>
+
+    <main class="card">
+      <!-- logo.png should live next to this index.html -->
+      <img src="logo.png" alt="SecureDoc logo" class="logo" />
+
+      <div class="lockpad">DOCUMENTS LOCKED !</div>
+      <div class="instructions">
+        Use our Mock Arduino if you don't have access to our hardware one! ( For
+        testing purpose only )
+      </div>
+
+      <div class="buttons">
+        <a href="arduino-mock.zip" class="btn primary" download id="btn-arduino"
+          >Download Arduino Mock App</a
+        >
+        <a href="securedoc-app.zip" class="btn" download id="btn-securedoc"
+          >Download SecureDoc App</a
+        >
+      </div>
+
+      <p class="notice">
+        <strong>Heads‑up:</strong> Please download and start the
+        <em>Arduino Mock App</em> <u>before</u> launching the
+        <em>SecureDoc App</em> to ensure everything works properly.
+      </p>
+    </main>
+
+    <script>
+      // simple ripple effect for the buttons
+      document.querySelectorAll(".btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          const circle = document.createElement("span");
+          const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+          const radius = diameter / 2;
+          circle.style.width = circle.style.height = `${diameter}px`;
+          circle.style.left = `${e.clientX - btn.offsetLeft - radius}px`;
+          circle.style.top = `${e.clientY - btn.offsetTop - radius}px`;
+          circle.classList.add("ripple");
+
+          // remove any existing ripple
+          const ripple = btn.querySelector(".ripple");
+          if (ripple) ripple.remove();
+
+          btn.appendChild(circle);
+        });
+      });
+    </script>
+  </body>
+</html>
