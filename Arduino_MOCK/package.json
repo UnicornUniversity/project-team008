@@ -1,11 +1,31 @@
 {
   "name": "keypad-mock",
   "version": "1.0.0",
+  "description": "A simple Electron keypad mock app",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder --win --publish never"
+  },
+  "build": {
+    "appId": "com.yourcompany.keypadmock",
+    "productName": "KeypadMock",
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "dist/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ]
+    }
   },
   "devDependencies": {
-    "electron": "^35.1.5"
+    "electron": "^35.1.5",
+    "electron-builder": "^25.1.8"
   }
 }
