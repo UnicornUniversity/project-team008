@@ -1,10 +1,8 @@
-// src/renderer/src/components/FileGrid.js
-import React, { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Grid,
   Card,
   CardActionArea,
-  CardContent,
   Typography,
   Box,
   Tooltip,
@@ -25,6 +23,8 @@ import { useFile } from '../hooks/useFile.js'
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog.jsx'
 import { useNavigate } from 'react-router-dom'
 import { useDownload } from '../hooks/useDownload.js'
+import { useStore } from '../store/useStore.js'
+import { appStore } from '../store/appStore.js'
 
 export const MAX_NAME_LENGTH = 20
 
@@ -47,11 +47,13 @@ export function fileIconByExtension(name) {
 
 export default function FileGrid() {
   const theme = useTheme()
-  const { listAll, deleteFile } = useFile()
+  const { upload, listAll, deleteFile } = useFile()
   const { download } = useDownload()
   const [files, setFiles] = useState([])
   const [dlgOpen, setDlgOpen] = useState(false)
   const [target, setTarget] = useState(null)
+  const fileInputRef = useRef(null)
+  const user = useStore(appStore, 'user')
 
   const navigate = useNavigate()
 
@@ -73,6 +75,26 @@ export default function FileGrid() {
       setFiles((f) => f.filter((x) => x.id !== target.id))
     }
     setDlgOpen(false)
+  }
+
+  const openFileDialog = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null
+      fileInputRef.current.click()
+    }
+  }
+
+  const handleFiles = (fileList) => {
+    user &&
+      upload(fileList[0]).then((result) => {
+        navigate('/files/detail/' + result?.id)
+      })
+  }
+
+  const onFileChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleFiles(e.target.files)
+    }
   }
 
   return (
@@ -207,7 +229,6 @@ export default function FileGrid() {
           )
         })}
 
-        {/* Upload placeholder */}
         <Grid item>
           <Card
             variant="outlined"
@@ -220,29 +241,38 @@ export default function FileGrid() {
               flexDirection: 'column'
             }}
           >
-            <CardActionArea
-              sx={{
-                flexGrow: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                px: 2
-              }}
-              onClick={() => {}}
-            >
-              <AddCircleOutlineOutlinedIcon sx={{ fontSize: 64 }} />
-              <Typography
-                variant="h6"
+            <>
+              <input
+                type="file"
+                style={{ display: 'none' }}
+                ref={fileInputRef}
+                onChange={onFileChange}
+              />
+
+              <CardActionArea
                 sx={{
-                  mt: 2,
-                  textAlign: 'center',
-                  whiteSpace: 'pre-line'
+                  flexGrow: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  px: 2
                 }}
+                onClick={openFileDialog}
               >
-                Drag & drop files here{'\n'}or click to upload
-              </Typography>
-            </CardActionArea>
+                <AddCircleOutlineOutlinedIcon sx={{ fontSize: 64 }} />
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mt: 2,
+                    textAlign: 'center',
+                    whiteSpace: 'pre-line'
+                  }}
+                >
+                  Drag & drop files here{'\n'}or click to upload
+                </Typography>
+              </CardActionArea>
+            </>
           </Card>
         </Grid>
       </Grid>

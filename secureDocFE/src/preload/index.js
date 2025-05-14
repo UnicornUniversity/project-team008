@@ -13,6 +13,11 @@ const api = {
     ipcRenderer.on('arduino-connected', listener)
     return () => ipcRenderer.removeListener('arduino-connected', listener)
   },
+  onDisconnect: (cb) => {
+    const listener = () => cb()
+    ipcRenderer.on('arduino-disconnected', listener)
+    return () => ipcRenderer.removeListener('arduino-disconnected', listener)
+  },
   write: (text) => ipcRenderer.send('arduino-write', text)
 }
 

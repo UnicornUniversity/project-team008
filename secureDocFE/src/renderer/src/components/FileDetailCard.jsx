@@ -106,6 +106,12 @@ export default function FileDetailCard() {
 
   const isOwner = user.id === owner.id
 
+  const isWriteAccess = useMemo(() => {
+    return accessList.some(
+      (entry) => entry.userId === user.id && entry.permission === 'write' && true
+    )
+  }, [accessList, user.id])
+
   const handleDownloadFile = async () => {
     if (isLocked) {
       lock.startLock()
@@ -145,6 +151,7 @@ export default function FileDetailCard() {
                     size="small"
                     value={entry.permission}
                     exclusive
+                    disabled={!isOwner && !isWriteAccess}
                     onChange={(_, newPerm) => {
                       if (newPerm) {
                         handlePermissionToggle(entry.id, newPerm)
@@ -182,6 +189,7 @@ export default function FileDetailCard() {
                     </ToggleButton>
                   </ToggleButtonGroup>
                   <Button
+                    disabled={!isOwner && !isWriteAccess}
                     onClick={async () => {
                       await revokeAccess({
                         userId: entry.userId,
@@ -321,9 +329,11 @@ export default function FileDetailCard() {
                 </Button>
               )}
 
-              <Button onClick={handleDeleteClick} variant={'outlined'} color={'error'}>
-                <DeleteSweepOutlined />
-              </Button>
+              {(isOwner || isWriteAccess) && (
+                <Button onClick={handleDeleteClick} variant={'outlined'} color={'error'}>
+                  <DeleteSweepOutlined />
+                </Button>
+              )}
             </Box>
           </Box>
         </CardContent>
@@ -412,12 +422,14 @@ export default function FileDetailCard() {
         </CardContent>
       </Card>
       <LockOverlay {...lock} handlePin={handleLockFile} />
-      <DeleteConfirmDialog
-        open={dlgOpen}
-        fileName={file?.fileName}
-        onClose={() => setDlgOpen(false)}
-        onConfirm={handleConfirmDelete}
-      />
+      {(isOwner || isWriteAccess) && (
+        <DeleteConfirmDialog
+          open={dlgOpen}
+          fileName={file?.fileName}
+          onClose={() => setDlgOpen(false)}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
     </Box>
   )
 }

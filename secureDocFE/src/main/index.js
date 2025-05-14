@@ -42,8 +42,10 @@ function connectMock() {
       console.warn(`${MAX_RETRIES} tries - giving up. Restart the app.`)
       mockSocket?.destroy()
       mockSocket = null
+      BrowserWindow.getAllWindows().forEach((w) => w.webContents.send('arduino-disconnected'))
       return
     }
+    BrowserWindow.getAllWindows().forEach((w) => w.webContents.send('arduino-disconnected'))
 
     console.warn(`🔁 Reconnecting… (${++retries}/${MAX_RETRIES})`)
 
@@ -97,19 +99,22 @@ function createWindow() {
     }
   })
 
-  Menu.buildFromTemplate([
+  const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Open DevTools',
       click: () => mainWindow.webContents.openDevTools({ mode: 'detach' })
     }
-  ]).popup()
-  mainWindow.webContents.on('context-menu', (_, params) => {
-    Menu.getApplicationMenu()?.popup({ x: params.x, y: params.y })
+  ])
+  mainWindow.webContents.on('context-menu', () => {
+    contextMenu.popup()
   })
 
-  mainWindow.on('ready-to-show', () => mainWindow.show())
-  mainWindow.webContents.setWindowOpenHandler((d) => {
-    shell.openExternal(d.url)
+  mainWindow.on('ready-to-show', () => {
+    mainWindow.show()
+  })
+
+  mainWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url)
     return { action: 'deny' }
   })
 
