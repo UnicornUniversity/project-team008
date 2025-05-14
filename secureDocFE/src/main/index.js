@@ -6,25 +6,56 @@ import icon from '../../resources/icon.png?asset'
 import * as net from 'net'
 import { SerialPort } from 'serialport'
 import { ReadlineParser } from '@serialport/parser-readline'
+import log from 'electron-log'
+
+console.log = (...args) => log.info(...args)
+console.warn = (...args) => log.warn(...args)
+console.error = (...args) => log.error(...args)
 
 let mockSocket
 let serialPort
 
+const MAX_RETRIES = 50
+let retries = 0
+let reconnectTimer
+
+console.log('MOCK_ARDUINO', import.meta.env.VITE_MOCK_ARDUINO)
+
 function connectMock() {
   mockSocket = net.connect(8123, '127.0.0.1')
-  mockSocket.once('connect', () => console.log('🟢 Mock Arduino connected'))
+
+  mockSocket.once('connect', () => {
+    console.log('+ Mock Arduino connected')
+    retries = 0
+  })
 
   mockSocket.on('data', (b) => {
     const line = b.toString().trim()
-    if (!line) return
-    BrowserWindow.getAllWindows().forEach((w) => w.webContents.send('arduino-line', line))
+    if (line) {
+      BrowserWindow.getAllWindows().forEach((w) => w.webContents.send('arduino-line', line))
+    }
   })
 
   const retryLater = () => {
-    console.warn('🔁 Reconnecting to mock Arduino...')
-    if (mockSocket) mockSocket.destroy()
+    if (reconnectTimer) return
+
+    if (retries >= MAX_RETRIES) {
+      console.warn(`${MAX_RETRIES} tries - giving up. Restart the app.`)
+      mockSocket?.destroy()
+      mockSocket = null
+      return
+    }
+
+    console.warn(`🔁 Reconnecting… (${++retries}/${MAX_RETRIES})`)
+
+    mockSocket?.removeAllListeners()
+    mockSocket?.destroy()
     mockSocket = null
-    setTimeout(connectMock, 2000)
+
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = null
+      connectMock()
+    }, 2000)
   }
 
   mockSocket.once('error', retryLater)
@@ -32,7 +63,7 @@ function connectMock() {
 }
 
 function connectRealSerial() {
-  const portPath = process.env.ARDUINO_PORT || 'COM5'
+  const portPath = import.meta.env.VITE_ARDUINO_PORT || 'COM5'
   serialPort = new SerialPort({ path: portPath, baudRate: 9600 })
   const parser = serialPort.pipe(new ReadlineParser({ delimiter: '\n' }))
 
@@ -42,8 +73,9 @@ function connectRealSerial() {
 
   parser.on('data', (line) => {
     const trimmed = line.trim()
-    if (trimmed)
+    if (trimmed) {
       BrowserWindow.getAllWindows().forEach((w) => w.webContents.send('arduino-line', trimmed))
+    }
   })
 
   serialPort.on('error', (err) => {
@@ -65,14 +97,16 @@ function createWindow() {
     }
   })
 
-  const contextMenu = Menu.buildFromTemplate([
+  Menu.buildFromTemplate([
     {
       label: 'Open DevTools',
       click: () => mainWindow.webContents.openDevTools({ mode: 'detach' })
     }
-  ])
+  ]).popup()
+  mainWindow.webContents.on('context-menu', (_, params) => {
+    Menu.getApplicationMenu()?.popup({ x: params.x, y: params.y })
+  })
 
-  mainWindow.webContents.on('context-menu', () => contextMenu.popup())
   mainWindow.on('ready-to-show', () => mainWindow.show())
   mainWindow.webContents.setWindowOpenHandler((d) => {
     shell.openExternal(d.url)
@@ -92,11 +126,11 @@ app.whenReady().then(() => {
 
   ipcMain.on('arduino-write', (_, d) => {
     const data = `${d}\n`
-    if (process.env.MOCK_ARDUINO && mockSocket?.writable) mockSocket.write(data)
+    if (import.meta.env.VITE_MOCK_ARDUINO && mockSocket?.writable) mockSocket.write(data)
     else if (serialPort?.writable) serialPort.write(data)
   })
 
-  if (process.env.MOCK_ARDUINO) connectMock()
+  if (import.meta.env.VITE_MOCK_ARDUINO) connectMock()
   else connectRealSerial()
 
   createWindow()

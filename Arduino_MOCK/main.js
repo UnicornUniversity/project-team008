@@ -1,7 +1,13 @@
+const log = require("electron-log");
+
 // main.js (Arduino MOCK)
 const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 const path = require("path");
 const net = require("net");
+
+console.log = (...args) => log.info(...args);
+console.warn = (...args) => log.warn(...args);
+console.error = (...args) => log.error(...args);
 
 // your same secret key as on Arduino
 const XOR_KEY = "mock_arduino";

@@ -1,9 +1,9 @@
 {
   "name": "securedocfe",
   "version": "1.0.0",
-  "description": "An Electron application with React",
-  "main": "./out/main/index.js",
-  "author": "example.com",
+  "description": "SecureDoc - Secure your documents",
+  "main": "out/main/index.js",
+  "author": "unicorn.net/team008",
   "homepage": "https://electron-vite.org",
   "scripts": {
     "format": "prettier --write .",
@@ -17,7 +17,26 @@
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "npm run build && electron-builder --mac",
     "build:linux": "npm run build && electron-builder --linux",
-    "electron": "electron ."
+    "electron": "electron .",
+    "dist": "npm run build && electron-builder --win"
+  },
+  "build": {
+    "appId": "unicorn.team008",
+    "productName": "SecureDocApp",
+    "files": [
+      "out/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": "assets/icon.ico"
+    }
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
@@ -28,6 +47,7 @@
     "@mui/material": "^7.0.2",
     "blueimp-md5": "^2.19.0",
     "dotenv": "^16.5.0",
+    "electron-log": "^5.4.0",
     "prop-types": "^15.8.1",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.5.1",
